@@ -18,3 +18,4 @@ no shut
 
 switchport mode access 
 switchport access vlan 100
+Vlan Name : Server
