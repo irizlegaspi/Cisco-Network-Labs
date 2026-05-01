@@ -1,1 +1,20 @@
 
+@P1
+int F0
+IP Address:  10.2.1.101 /24
+VLAN 10
+
+@P2
+int F0
+IP Address:  10.2.1.102 /24
+VLAN 100
+
+
+@A2
+conf t
+int vlan 100
+ip address 192.168.1.132 255.255.255.0
+no shut
+
+switchport mode access 
+switchport access vlan 100
