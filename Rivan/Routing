@@ -1,21 +1,151 @@
+@All Network Devices Basic Configuration:
+en
+conf t
+hostname <Device Name>
+enable secret pass
+service password-encryption
+! no logging console
+no ip domain-lookup
+!
+line con 0
+exec-timeout 0 0
+password pass
+login
+exit
+!
+line vty 0 4
+exec-timeout 0 0
+password pass
+login 
+! transport input all
+exit
 
+
+Assigned IP Address on P1, P2, S1, S2
+--------------------------------------
 @P1
 int F0
 IP Address:  10.2.1.101 /24
 VLAN 10
-
+--------------------
 @P2
 int F0
 IP Address:  10.2.1.102 /24
 VLAN 100
+---------------------
+@S1
+int F0
+IP Address:  192.168.1.133 /24
+VLAN 100
+----------------------
+@S2
+int F0
+IP Address:  10.2.2.133 /24
+VLAN 20
 
 
+
+------------------------------
+Assigned VLANS 
+
+@A1
+conf t
+vlan 10
+name Management
+!
+int g1/0/1
+switchport mode access
+switchport access vlan 10
+exit
+!
+vlan 100
+name Server
+!
+int vlan 100
+ip address 192.168.1.131 255.255.255.224
+no shut
+!
+do sh history
+sh vlan br
+exit
+
+
+-------------------------
 @A2
 conf t
+vlan 100
+name Server
+!
 int vlan 100
-ip address 192.168.1.132 255.255.255.0
+ip address 192.168.1.132 255.255.255.224
 no shut
+!
+exit
+sh vlan br
+!
+vlan 10
+name Management
+!
+int g1/0/1
+switchport mode access
+switchport access vlan 10
+exit
+!
 
-switchport mode access 
+@D1
+conf t
+int G1/0/3
+switchport mode access
 switchport access vlan 100
-Vlan Name : Server
+do sh vlan br
+Exit
+
+
+@D2
+conf t
+int G1/0/2
+switchport mode access
+switchport access vlan 20
+do sh vlan br
+Exit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
