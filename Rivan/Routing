@@ -1,7 +1,7 @@
 @All Network Devices Basic Configuration: Change the Banner only
 en
 conf t
-hostname <Device Name>
+hostname R4
 enable secret pass
 service password-encryption
 ! no logging console
@@ -20,8 +20,36 @@ login
 logging synchronous
 exit
 !
-banner motd & ------------------------- A1 ------------------------------ &
-banner login & ------------------------- BEWARE ------------------------------ &
+banner motd & ------------------------- R4 ------------------------------ &
+banner login & ---------------------- BEWARE ---------------------------- &
+exit
+
+
+
+----------------------------------------------------
+Assigned IP Address on P1, P2, S1, S2 End devices
+----------------------------------------------------
+@P1
+int F0
+IP Address:  10.2.1.101 /24
+Assigned to VLAN 10
+
+@P2
+int F0
+IP Address:  10.2.1.102 /24
+Assigned to VLAN 10
+
+@S1
+int F0
+IP Address:  192.168.1.133 /24
+Assigned to VLAN 100
+
+@S2
+int F0
+IP Address:  10.2.2.133 /24
+Assigned to VLAN 20
+
+
 
 
 ------------------------------
@@ -44,15 +72,6 @@ vtp version 2
 exit
 
  
-
-
-
-
-
-
-
-
-
 
 ------------------------------
 Create  VLANS 
@@ -159,28 +178,6 @@ exit
 
 
 
-----------------------------------------------------
-Assigned IP Address on P1, P2, S1, S2 End devices
-----------------------------------------------------
-@P1
-int F0
-IP Address:  10.2.1.101 /24
-Assigned to VLAN 10
-
-@P2
-int F0
-IP Address:  10.2.1.102 /24
-Assigned to VLAN 10
-
-@S1
-int F0
-IP Address:  192.168.1.133 /24
-Assigned to VLAN 100
-
-@S2
-int F0
-IP Address:  10.2.2.133 /24
-Assigned to VLAN 20
 
 
 ---------------------------------------------------------------
@@ -232,10 +229,26 @@ exit
 
 
 ---------------------------------------------------------------
-Configure Trunk Ports on All L3 SW @D1, @D2, @A1, @A2
+Configure IP Address on all Routers
 ---------------------------------------------------------------
 
-
+@R4
+conf t
+int G0/0
+ip address 10.1.4.5 255.255.255.252
+no shut
+exit
+!
+int G0/1
+ip address 10.1.4.9 255.255.255.252
+no shut
+exit
+!
+int G0/2
+ip address 10.1.1.10 255.255.255.252
+no shut
+exit
+!
 
 
 
