@@ -1,4 +1,4 @@
-@All Network Devices Basic Configuration:
+@All Network Devices Basic Configuration: Change the Banner only
 en
 conf t
 hostname <Device Name>
@@ -17,89 +17,88 @@ line vty 0 4
 exec-timeout 0 0
 password pass
 login 
-! transport input all
+logging synchronous
+exit
+!
+banner motd & ------------------------- A1 ------------------------------ &
+banner login & ------------------------- BEWARE ------------------------------ &
+
+
+------------------------------
+Configure VTP D1, D2, A1, A2
+------------------------------
+@D1
+conf t
+vtp mode server
+vtp domain rivan-ccna
+vtp password pass
+vtp version 2
 exit
 
+@D2, @A1, @A2
+conf t
+vtp mode client 
+vtp domain rivan-ccna
+vtp password pass
+vtp version 2
+exit
 
-Assigned IP Address on P1, P2, S1, S2
---------------------------------------
-@P1
-int F0
-IP Address:  10.2.1.101 /24
-VLAN 10
---------------------
-@P2
-int F0
-IP Address:  10.2.1.102 /24
-VLAN 100
----------------------
-@S1
-int F0
-IP Address:  192.168.1.133 /24
-VLAN 100
-----------------------
-@S2
-int F0
-IP Address:  10.2.2.133 /24
-VLAN 20
+ 
+
+
+
+
+
+
+
 
 
 
 ------------------------------
-Assigned VLANS 
+Create  VLANS 
+------------------------------
+@D1
+conf t
+vlan 10 
+name Management
+!
+vlan 20
+name DNS
+!
+vlan 100
+name Server
+exit
+!
 
+
+------------------------------
+Assigned VLAN to Switchport
+------------------------------
 @A1
 conf t
-vlan 10
-name Management
-!
 int g1/0/1
 switchport mode access
 switchport access vlan 10
 exit
-!
-vlan 100
-name Server
-!
-int vlan 100
-ip address 192.168.1.131 255.255.255.224
-no shut
-!
-do sh history
-sh vlan br
-exit
 
 
--------------------------
 @A2
 conf t
-vlan 100
-name Server
-!
-int vlan 100
-ip address 192.168.1.132 255.255.255.224
-no shut
-!
-exit
-sh vlan br
-!
-vlan 10
-name Management
-!
 int g1/0/1
 switchport mode access
 switchport access vlan 10
 exit
 !
+sh vlan br
+exit
 
 @D1
 conf t
-int G1/0/3
+int G1/0/4
 switchport mode access
 switchport access vlan 100
 do sh vlan br
 Exit
-
 
 @D2
 conf t
@@ -110,20 +109,131 @@ do sh vlan br
 Exit
 
 
+------------------------------
+Create VLAN SVI
+------------------------------
+@D1
+conf t
+int vlan 10
+ip address 10.2.1.1 255.255.255.0
+exit
+!
+int vlan 20
+ip address 10.2.2.1 255.255.255.0
+exit
+!
+int vlan 100
+ip address 192.168.1.129 255.255.255.224
+exit
+
+
+@D2
+conf t
+int vlan 10
+ip address 10.2.1.2 255.255.255.0
+no shut
+exit
+!
+int vlan 20
+ip address 10.2.2.2 255.255.255.0
+no shut
+exit
+!
+int vlan 100
+ip address 192.168.1.130 255.255.255.224
+no shut
+exit
+
+
+@A1
+conf t
+int vlan 100
+ip address 192.168.1.131 255.255.255.224
+exit
+
+@A2
+conf t
+int vlan 100
+ip address 192.168.1.132 255.255.255.224
+exit
 
 
 
+----------------------------------------------------
+Assigned IP Address on P1, P2, S1, S2 End devices
+----------------------------------------------------
+@P1
+int F0
+IP Address:  10.2.1.101 /24
+Assigned to VLAN 10
+
+@P2
+int F0
+IP Address:  10.2.1.102 /24
+Assigned to VLAN 10
+
+@S1
+int F0
+IP Address:  192.168.1.133 /24
+Assigned to VLAN 100
+
+@S2
+int F0
+IP Address:  10.2.2.133 /24
+Assigned to VLAN 20
 
 
+---------------------------------------------------------------
+Configure Trunk Ports on All L3 SW @D1, @D2, @A1, @A2
+---------------------------------------------------------------
+@D1
+conf t
+ int range g1/0/1-3
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+exit
+!
+interface g1/0/5
+ no switchport
+ ip address 10.1.4.6 255.255.255.252
+ no shutdown
+exit
+!
 
 
+@D2
+conf t
+int range g1/0/1, g1/0/3, g1/0/5 
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+exit
+!
+interface g1/0/4
+ no switchport
+ ip address 10.1.4.10 255.255.255.252
+ no shutdown
+exit
 
 
+@A1
+conf t
+int range g1/0/2-3
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+exit
 
 
+@A2
+conf t
+int range g1/0/2-3
+switchport mode trunk
+switchport trunk allowed vlan 10,20,100
+exit
 
 
-
+---------------------------------------------------------------
+Configure Trunk Ports on All L3 SW @D1, @D2, @A1, @A2
+---------------------------------------------------------------
 
 
 
