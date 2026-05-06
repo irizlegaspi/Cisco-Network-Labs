@@ -1,7 +1,7 @@
 @All Network Devices Basic Configuration: Change the Banner only
 en
 conf t
-hostname R4
+hostname ISP3
 enable secret pass
 service password-encryption
 ! no logging console
@@ -20,7 +20,7 @@ login
 logging synchronous
 exit
 !
-banner motd & ------------------------- R4 ------------------------------ &
+banner motd & ------------------------- ISP3 ---------------------------- &
 banner login & ---------------------- BEWARE ---------------------------- &
 exit
 
@@ -274,17 +274,95 @@ no shut
 exit
 
 
+@R2
+conf t
+int G0/1
+ip address 10.1.1.5 255.255.255.252
+no shut
+exit
+!
+int G0/0
+ip address 10.1.1.2 255.255.255.252
+no shut
+exit
+!
+int Lo3
+ip address 2.2.2.2 255.255.255.255
+no shut
+exit
+
+
+@R2
+conf t
+int G1
+ip address 10.1.1.1 255.255.255.252
+no shut
+exit
+!
+int G0/0
+ip address 10.1.1.2 255.255.255.252
+no shut
+exit
+!
+int Lo3
+ip address 2.2.2.2 255.255.255.255
+no shut
+exit
+
+@R1
+conf t
+int g0/0
+ip address 10.1.1.1 255.255.255.252
+no shut
+exit
+!
+int g1/0
+ip address 208.8.8.1 255.255.255.0
+no shut
+exit
+!
+int g2/0
+ip address 207.7.7.1 255.255.255.0
+no shut
+exit
+!
+int g3/0
+ip address 209.9.9.1 255.255.255.0
+no shut
+exit
+!
+int Lo1
+ip address 1.1.1.1 255.255.255.255
+no shut
+exit
 
 
 
+---------------------------------------------------------------
+Configure IP Address on all L3 External - BGP
+---------------------------------------------------------------
 
-
-
-
-
-
-
-
+ISP1
+conf t
+int GigabitEthernet 1/0/1
+ip address 208.8.8.4 255.255.255.0
+no shut
+exit
+!
+int g1/0/2
+ip address 45.4.5.4 255.255.255.0
+no shut
+exit
+!
+int g1/0/3
+ip address 24.2.4.4 255.255.255.0
+no shut
+exit
+!
+int Lo0 
+ip address 44.44.44.44 255.255.255.255
+no shut
+exit
 
 
 
