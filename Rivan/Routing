@@ -1,7 +1,7 @@
 @All Network Devices Basic Configuration: Change the Banner only
 en
 conf t
-hostname ISP2-PLDT
+hostname PC1
 enable secret pass
 service password-encryption
 ! no logging console
@@ -20,8 +20,8 @@ login
 logging synchronous
 exit
 !
-banner motd & --------------------- ISP2-PLDT -------------------------- &
-banner login & ---------------------- BEWARE ---------------------------- &
+banner motd & --------------------- PC1 -------------------------- &
+banner login & ------------------- BEWARE ------------------------ &
 exit
 
 
@@ -30,14 +30,20 @@ exit
 Assigned IP Address on P1, P2, S1, S2 End devices
 ----------------------------------------------------
 @P1
-int F0
-IP Address:  10.2.1.101 /24
-Assigned to VLAN 10
+conf t
+int G0/0
+ip address 10.2.1.101 255.255.255.0
+no shut
+exit
 
 @P2
-int F0
-IP Address:  10.2.1.102 /24
+conf t
+int G0/0
+ip address 10.2.1.102 255.255.255.0
 Assigned to VLAN 10
+no shut
+exit
+
 
 @S1
 int F0
@@ -416,7 +422,6 @@ no shut
 exit
 
 
-
 @GOOGLE-DNS
 conf t
 int G0/0
@@ -446,27 +451,63 @@ no shut
 exit
 
 
-
-
 ---------------------------------------------------------------
 Configure EIGRP
 ---------------------------------------------------------------
-@AI
+@D1
+conf t
+ip routing
+router eigrp 100
+network 10.2.1.0 0.0.0.255
+network 10.2.2.0 0.0.0.255
+network 192.168.1.128 0.0.0.31
+network 10.1.4.4 0.0.0.3
+exit
 
 
-
-
-
-
-
-
-
+@D2
+conf t
+ip routing
+router eigrp 100
+network 10.2.1.0 0.0.0.255
+network 10.2.2.0 0.0.0.255
+network 192.168.1.128 0.0.0.31
+network 10.1.4.8 0.0.0.31
+exit
 
 
 
 ============================================
 Default Floating Static Default Route
 ============================================
+@P1
+conf t
+ ip route 0.0.0.0 0.0.0.0 10.2.1.1 1
+  ! D1 Primary
+ ip route 0.0.0.0 0.0.0.0 10.2.1.2 10
+  ! D2 Secondary
+end
+
+@PC2
+conf t 
+ip route 0.0.0.0 0.0.0.0 10.2.1.2 1
+  ! Gateway VLAN 10 - D2 - Primary
+ip route 0.0.0.0 0.0.0.0 10.2.1.1 10
+  ! ! Gateway VLAN 10 - D1 - secondary
+exit
 
 
+S1 and S2 Def-GW
+
+
+
+
+
+
+
+VERIFY GW:
+R2: sh ip route GW: 10.1.1.1 /
+R3: sh ip route GW: 10.1.1.5 /
+R4: sh ip route GW: 10.1.1.9 /
+D1: sh ip route GW: 10.1.4.5 /
 
