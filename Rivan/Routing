@@ -1,7 +1,7 @@
 @All Network Devices Basic Configuration: Change the Banner only
 en
 conf t
-hostname ISP3
+hostname ISP2-PLDT
 enable secret pass
 service password-encryption
 ! no logging console
@@ -20,7 +20,7 @@ login
 logging synchronous
 exit
 !
-banner motd & ------------------------- ISP3 ---------------------------- &
+banner motd & --------------------- ISP2-PLDT -------------------------- &
 banner login & ---------------------- BEWARE ---------------------------- &
 exit
 
@@ -336,25 +336,23 @@ ip address 1.1.1.1 255.255.255.255
 no shut
 exit
 
-
-
 ---------------------------------------------------------------
-Configure IP Address on all L3 External - BGP
+Configure IP Address on all Routers External BGP
 ---------------------------------------------------------------
 
-ISP1
+@ISP1-CONVERGE
 conf t
-int GigabitEthernet 1/0/1
+int G0/0
 ip address 208.8.8.4 255.255.255.0
 no shut
 exit
 !
-int g1/0/2
+int G0/1
 ip address 45.4.5.4 255.255.255.0
 no shut
 exit
 !
-int g1/0/3
+int G0/2
 ip address 24.2.4.4 255.255.255.0
 no shut
 exit
@@ -366,7 +364,109 @@ exit
 
 
 
+@ISP2-PLDT
+conf t
+int G0/0
+ip address 207.7.7.2 255.255.255.0
+no shut
+exit
+!
+int G1/0
+ip address 24.2.4.2 255.255.255.0
+no shut
+exit
+!
+int G2/0
+ip address 32.3.2.2 255.255.255.0
+no shut
+exit
+!
+int G3/0
+ip address 25.2.5.2 255.255.255.0
+no shut
+exit
+!
+int Lo0 
+ip address 22.22.22.22 255.255.255.255
+no shut
+exit
 
+
+@ISP3-GLOBE
+conf t
+int G0/1
+ip address 35.3.5.3 255.255.255.0
+no shut
+exit
+!
+int G0/2
+ip address 32.3.2.3 255.255.255.0
+no shut
+exit
+!
+int G0/0
+ip address 209.9.9.3 255.255.255.0
+no shut
+exit
+!
+
+int Lo0 
+ip address 33.33.33.33 255.255.255.255
+no shut
+exit
+
+
+
+@GOOGLE-DNS
+conf t
+int G0/0
+ip address 35.3.5.5 255.255.255.0
+no shut
+exit
+!
+int G0/1
+ip address 25.22.5.5 255.255.255.0
+no shut
+exit
+!
+int G0/2
+ip address 45.4.5.5 255.255.255.0
+no shut
+exit
+!
+
+int Lo0 
+ip address 55.55.55.55 255.255.255.255
+no shut
+exit
+!
+int Lo8
+ip address 8.8.8.8 255.255.255.255
+no shut
+exit
+
+
+
+
+---------------------------------------------------------------
+Configure EIGRP
+---------------------------------------------------------------
+@AI
+
+
+
+
+
+
+
+
+
+
+
+
+============================================
+Default Floating Static Default Route
+============================================
 
 
 
