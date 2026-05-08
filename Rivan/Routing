@@ -563,6 +563,10 @@ exit
 
 @R2
 conf t
+int g0/0
+ip ospf priority 255
+exit
+!
 router ospf 1
 router-id 2.2.2.2
 network 10.1.1.4 0.0.0.3 area 0
@@ -573,6 +577,10 @@ exit
 
 @R1
 conf t
+int g0/0
+ip ospf priority 0
+exit
+!
 router ospf 1
 router-id 1.1.1.1
 network 1.1.1.1 0.0.0.0 area 0
