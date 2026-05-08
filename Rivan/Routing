@@ -1,7 +1,7 @@
 @All Network Devices Basic Configuration: Change the Banner only
 en
 conf t
-hostname PC1
+hostname S2
 enable secret pass
 service password-encryption
 ! no logging console
@@ -20,7 +20,7 @@ login
 logging synchronous
 exit
 !
-banner motd & --------------------- PC1 -------------------------- &
+banner motd & --------------------- S2 -------------------------- &
 banner login & ------------------- BEWARE ------------------------ &
 exit
 
@@ -46,14 +46,20 @@ exit
 
 
 @S1
-int F0
-IP Address:  192.168.1.133 /24
-Assigned to VLAN 100
+conf t
+int G0/0
+ip address 192.168.1.133 255.255.255.224
+no shut
+exit
+
 
 @S2
-int F0
-IP Address:  10.2.2.133 /24
-Assigned to VLAN 20
+conf t
+int G0/0
+ip address 10.2.2.133 255.255.255.0
+no shut
+exit
+
 
 
 
@@ -502,7 +508,10 @@ ip route 0.0.0.0 0.0.0.0 10.2.1.1 10
 exit
 
 
-S1 and S2 Def-GW
+@S1 
+
+
+@S2 Def-GW
 
 
 
