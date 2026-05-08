@@ -509,9 +509,14 @@ exit
 
 
 @S1 
+conf t
+ip route 0.0.0.0 0.0.0.0 10.2.2.2 
+exit
 
-
-@S2 Def-GW
+@S2
+conf t
+ip route 0.0.0.0 0.0.0.0 10.2.2.1
+exit
 
 
 
