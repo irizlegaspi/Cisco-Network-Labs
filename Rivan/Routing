@@ -594,3 +594,80 @@ R3: sh ip route GW: 10.1.1.5 /
 R4: sh ip route GW: 10.1.1.9 /
 D1: sh ip route GW: 10.1.4.5 /
 
+
+---------------------------------------------------------------
+Redistribution EIGRP and OSPF and Route Propagation
+---------------------------------------------------------------
+@R4
+conf t
+router ospf 1
+redistribute eigrp 100 subnets
+exit
+!
+router eigrp 100
+redistribute ospf 1 metric 10000 100 255 1 1500
+exit
+
+
+! Default Route Propagation
+@R1
+-----------
+conf t
+ router ospf 1
+ default-information originate
+end
+
+
+---------------------------------------------------------------
+Conigure BGP
+---------------------------------------------------------------
+
+@R1 - AS#1
+conf t
+ router bgp 1
+  bgp log-neighbor-changes
+  !
+  network 208.8.8.0 mask 255.255.255.0
+  network 207.7.7.0 mask 255.255.255.0
+  network 209.9.9.0 mask 255.255.255.0
+ !
+end
+
+@ISP2 - PLDT AS#2
+conf t
+router bgp 2
+ bgp log-neighbor-changes
+!
+network 207.7.7.0 mask 255.255.255.0
+network 32.3.2.0 mask 255.255.255.0 
+network 24.2.4.0 mask 255.255.255.0
+network 25.2.5.0 mask 255.255.255.0
+network 22.22.22.22 mask 255.255.255.255
+exit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
