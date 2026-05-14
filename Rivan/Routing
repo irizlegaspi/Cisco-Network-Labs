@@ -497,7 +497,15 @@ ip route 0.0.0.0 0.0.0.0 10.2.2.1 2
 exit
 
 
+@D1
+conf t
+ ip route 0.0.0.0 0.0.0.0 10.1.4.5
+exit
 
+@D2
+conf t
+ ip route 0.0.0.0 0.0.0.0 10.1.4.9
+exit
 
 ---------------------------------------------------------------
 Configure EIGRP
@@ -583,8 +591,8 @@ exit
 !
 router ospf 1
 router-id 1.1.1.1
-network 1.1.1.1 0.0.0.0 area 0
-network 10.1.1.0 0.0.0.3 area 0
+ network 1.1.1.1 0.0.0.0 area 0
+ network 10.1.1.0 0.0.0.3 area 0
 exit
 
 
@@ -619,7 +627,7 @@ end
 
 
 ---------------------------------------------------------------
-Conigure BGP
+Configure BGP
 ---------------------------------------------------------------
 
 @R1 - AS# 
@@ -726,12 +734,6 @@ bgp log-neighbor-changes
  network 35.3.5.0 mask 255.255.255.0
  network 55.55.55.55  mask 255.255.255.255
  network 8.8.8.8 mask 255.255.255.255
-!
-address-family ipv4
- neighbor 35.3.5.3 remote-as 3
- neighbor 25.2.5.2 remote-as 1
- neighbor 45.4.5.4 remote-as 45
-!
 end
 
 
@@ -796,29 +798,10 @@ end
 
 
 DEFAULT GATEWAY:
-R1#
-R2# Gateway of last resort is 10.1.1.1 to network 0.0.0.0
-R3# Gateway of last resort is 10.1.1.5 to network 0.0.0.0
-R4# Gateway of last resort is 10.1.1.9 to network 0.0.0.0
-
-@R4
-conf t
- ip route 0.0.0.0 0.0.0.0 10.1.1.9
-exit
-
-@R3
-conf t
- ip route 0.0.0.0 0.0.0.0 10.1.1.5
-exit
-
-@R2
-conf t
- ip route 0.0.0.0 0.0.0.0 10.1.1.1
-exit
-
-VERIFY: sh ip route
-
-
+@R1
+ip route 0.0.0.0 0.0.0.0 208.8.8.4 5
+ip route 0.0.0.0 0.0.0.0 207.7.7.2 1
+ip route 0.0.0.0 0.0.0.0 209.9.9.3 10
 
 
 
