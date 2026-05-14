@@ -622,38 +622,114 @@ end
 Conigure BGP
 ---------------------------------------------------------------
 
-@R1 - AS#1
+@R1 - AS# 
 conf t
  router bgp 1
   bgp log-neighbor-changes
-  !
-  network 208.8.8.0 mask 255.255.255.0
-  network 207.7.7.0 mask 255.255.255.0
-  network 209.9.9.0 mask 255.255.255.0
+  neighbor 208.8.8.4 remote-as 45 
+  neighbor 207.7.7.2 remote-as 2
+  neighbor 209.9.9.3 remote-as 3
  !
+address-family ipv4
+ neighbor 208.8.8.4 activate
+  network 207.7.7.2 activate
+  network 209.9.9.3 activate
+!
+! specify network
+ network 207.7.7.0 mask 255.255.255.0
+ network 209.9.9.0 mask 255.255.255.0
+ network 208.8.8.0 mask 255.255.255.0
 end
 
-@ISP2 - PLDT AS#2
+
+
+@ISP2 - PLDT AS# 2
 conf t
 router bgp 2
- bgp log-neighbor-changes
+bgp log-neighbor-changes
+ neighbor 207.7.7.1 remote-as 1
+ neighbor 24.2.4.4 remote-as 45
+ neighbor 32.3.2.3 remote-as 3
+ neighbor 25.2.5.5 remote-as 45
 !
-network 207.7.7.0 mask 255.255.255.0
-network 32.3.2.0 mask 255.255.255.0 
-network 24.2.4.0 mask 255.255.255.0
-network 25.2.5.0 mask 255.255.255.0
-network 22.22.22.22 mask 255.255.255.255
-exit
+address-family ipv4
+ neighbor 207.7.7.1 activate
+ neighbor 24.2.4.4 activate
+ neighbor 32.3.2.3 activate
+ neighbor 25.2.5.5 activate
+!
+! specify network
+ network 207.7.7.0 mask 255.255.255.0
+ network 32.3.2.0 mask 255.255.255.0 
+ network 24.2.4.0 mask 255.255.255.0
+ network 25.2.5.0 mask 255.255.255.0
+ network 22.22.22.22 mask 255.255.255.255
+end
 
 
 
 
+@ISP3 - GLOBE AS# 3
+conf t
+router bgp 3
+bgp log-neighbor-changes
+ neighbor 32.3.2.2 remote-as 2
+ neighbor 209.9.9.1 remote-as 1
+ neighbor 35.3.5.5 remote-as 45
+!
+address-family ipv4
+ neighbor 32.3.2.2 activate
+ neighbor 209.9.9.1 activate
+ neighbor 35.3.5.5 activate
+!
+! specify network
+ network 209.9.9.0 mask 255.255.255.0
+ network 32.3.2.0 mask 255.255.255.0 
+ network 35.3.5.0 mask 255.255.255.0
+ network 33.33.33.33 mask 255.255.255.255
+end
 
 
+@ISP 2 - COVERGE AS# 45
+conf t
+router bgp 45
+bgp log-neighbor-changes
+ neighbor 45.4.5.5 remote-as 45
+ neighbor 24.2.4.2 remote-as 2
+ neighbor 208.8.8.1 remote-as 1
+!
+address-family ipv4
+ neighbor 45.4.5.5 activate
+ neighbor 24.2.4.2 activate
+ neighbor 208.8.8.1 activate
+!
+! specify network 
+ network 45.4.5.0 mask 255.255.255.0
+ network 24.2.4.0 mask 255.255.255.0
+ network 208.8.8.0 mask 255.255.255.0
+ network 44.44.44.44  mask 255.255.255.255
+end
 
 
-
-
+@GOOGLE DNS - COVERGE AS# 45
+conf t
+router bgp 45
+bgp log-neighbor-changes
+ neighbor 35.3.5.3 remote-as 3
+ neighbor 25.2.5.2 remote-as 1
+ neighbor 45.4.5.4 remote-as 45
+!
+address-family ipv4
+ neighbor 35.3.5.3 remote-as 3
+ neighbor 25.2.5.2 remote-as 1
+ neighbor 45.4.5.4 remote-as 45
+!
+! specify network 
+ network 45.4.5.0 mask 255.255.255.0
+ network 24.2.4.0 mask 255.255.255.0
+ network 208.8.8.0 mask 255.255.255.0
+ network 44.44.44.44  mask 255.255.255.255
+end
 
 
 
