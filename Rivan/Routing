@@ -430,7 +430,7 @@ exit
 int Lo0 
 ip address 33.33.33.33 255.255.255.255
 no shut
-exit
+exit 
 
 
 @GOOGLE-DNS
@@ -629,6 +629,7 @@ conf t
   neighbor 208.8.8.4 remote-as 45 
   neighbor 207.7.7.2 remote-as 2
   neighbor 209.9.9.3 remote-as 3
+exit
  !
 address-family ipv4
  neighbor 208.8.8.4 activate
@@ -690,7 +691,7 @@ address-family ipv4
 end
 
 
-@ISP 2 - COVERGE AS# 45
+@ISP 1 - COVERGE AS# 45
 conf t
 router bgp 45
 bgp log-neighbor-changes
@@ -719,22 +720,36 @@ bgp log-neighbor-changes
  neighbor 25.2.5.2 remote-as 1
  neighbor 45.4.5.4 remote-as 45
 !
+! specify network 
+ network 45.4.5.0 mask 255.255.255.0
+ network 25.2.5.0 mask 255.255.255.0
+ network 35.3.5.0 mask 255.255.255.0
+ network 55.55.55.55  mask 255.255.255.255
+ network 8.8.8.8 mask 255.255.255.255
+!
 address-family ipv4
  neighbor 35.3.5.3 remote-as 3
  neighbor 25.2.5.2 remote-as 1
  neighbor 45.4.5.4 remote-as 45
 !
-! specify network 
- network 45.4.5.0 mask 255.255.255.0
- network 24.2.4.0 mask 255.255.255.0
- network 208.8.8.0 mask 255.255.255.0
- network 44.44.44.44  mask 255.255.255.255
 end
 
 
 
 
-
+---------------------------------------------------------------
+Conigure Redistribute
+---------------------------------------------------------------
+@R4
+conf t
+ router ospf 1
+ redistribute eigrp 100 subnets
+exit
+!
+router eigrp 100
+ redistribute ospf 1 metric 10000 100 255 1 1500
+ ! BW - DLY - Reliability - LOAD -  MTU
+end
 
 
 
