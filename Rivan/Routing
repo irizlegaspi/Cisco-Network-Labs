@@ -790,7 +790,7 @@ access-list 1 permit 192.168.0.0 0.0.0.255
 !
 ip nat inside source static 10.2.1.101 209.9.9.10
 ip nat inside source static 10.2.1.101 209.9.9.10
-ip nat inside source static 192.168.1.133 207.7.7.10
+ip nat inside source static 192.168.1.134 207.7.7.10
 ip nat inside source static 10.2.2.133 208.8.8.10
 ip nat inside source list 1 int g3/0 overload
 end
