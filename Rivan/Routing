@@ -960,6 +960,14 @@ end
 
 
 
+=================================
+Configure STP @D1, @D2, @A1, @A2 
+=================================
+1. sh cdp neighbor
+2. Trunk All Ports
+@D1
+conf t
+int 
 
 
 
