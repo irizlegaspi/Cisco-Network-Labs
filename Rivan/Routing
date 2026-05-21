@@ -202,6 +202,11 @@ conf t
  switchport trunk allowed vlan 10,20,100
 exit
 !
+ int range g1/0/6-8
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+exit
+!
 interface g1/0/5
  no switchport
  ip address 10.1.4.6 255.255.255.252
