@@ -1025,6 +1025,74 @@ VERIFY:
 ==================================================================
 Configure STP ROOT GUARD & BPDU AT ACCESS PORT OF  @D1, @D2, @A1, @A2 
 ==================================================================
+@D1
+conf t
+int range g1/0/9-24
+spanning-tree portfast
+spanning-tree bpduguard enable
+shutdowm
+exit
+!
+int range g1/1/1-4
+spanning-tree portfast
+spanning-tree bpduguard enable
+shutdown
+exit
+
+@D2
+conf t
+int range g1/0/9-24
+spanning-tree portfast
+spanning-tree bpduguard enable
+shutdown
+exit
+!
+int range g1/1/1-4
+spanning-tree portfast
+spanning-tree bpduguard enable
+shutdown
+exit
+
+@A1
+conf t
+int range g1/0/7-24
+spanning-tree portfast
+spanning-tree bpduguard enable
+shutdown
+exit
+!
+int range g1/1/1-4
+spanning-tree portfast
+spanning-tree bpduguard enable
+shutdown
+exit
+
+
+
+==================================================================
+Configure Etherchannel @D1, @D2, @A1, @A2 
+==================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
