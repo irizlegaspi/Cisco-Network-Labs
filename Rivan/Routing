@@ -222,6 +222,10 @@ int range g1/0/1, g1/0/3, g1/0/5
  switchport trunk allowed vlan 10,20,100
 exit
 !
+int range g1/0/6-8
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+!
 interface g1/0/4
  no switchport
  ip address 10.1.4.10 255.255.255.252
@@ -235,6 +239,11 @@ int range g1/0/2-3
  switchport mode trunk
  switchport trunk allowed vlan 10,20,100
 exit
+!
+int range g1/0/5-6
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+exit
 
 
 @A2
@@ -242,6 +251,11 @@ conf t
 int range g1/0/2-3
 switchport mode trunk
 switchport trunk allowed vlan 10,20,100
+exit
+!
+int range g1/0/5-6
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
 exit
 
 
@@ -966,20 +980,51 @@ end
 
 
 =================================
-Configure STP @D1, @D2, @A1, @A2 
+Configure STP TRUNK PORT OF @D1, @D2, @A1, @A2 
 =================================
 1. sh cdp neighbor
-2. Trunk All Ports
+2. Trunk All the remaining ports
+
+Root Primary:
+ V10 - D1
+ V20 - D2
+ V100 - D2
+
+Root Secondary:
+ V10 - DD2
+ V20 - D1
+ V100 - D1
+
+@D1, @D2, @A1, @A2
+conf t
+ spanning-tree mode rapid-pvst
+exit
+
+
 @D1
 conf t
-int 
+ spanning-tree vlan 10 root primary
+ spanning-tree vlan 20 root secondary
+ spanning-tree vlan 100 root secondary
+exit
+
+VERIFY: 
+# sh spanning-tree
+
+@D2
+conf t
+ spanning-tree vlan 10 root secondary
+ spanning-tree vlan 20 root primary
+ spanning-tree vlan 100 root primary
+exit
+
+VERIFY: 
+# sh spanning-tree
 
 
-
-
-
-
-
+==================================================================
+Configure STP ROOT GUARD & BPDU AT ACCESS PORT OF  @D1, @D2, @A1, @A2 
+==================================================================
 
 
 
