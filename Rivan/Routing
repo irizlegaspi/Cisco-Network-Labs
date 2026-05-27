@@ -1123,6 +1123,12 @@ channel-protocol lacp
 channel-group 1 mode active
 no shut
 exit
+!
+int port-channel 1
+ switchport mode trunk
+exit
+
+
 
 @D2
 conf t
@@ -1131,6 +1137,10 @@ shut
 channel-protocol lacp
 channel-group 1 mode passive
 no shut
+exit
+
+int port-channel 2
+ switchport mode trunk
 exit
 
 
