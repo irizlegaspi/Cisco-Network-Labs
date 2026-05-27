@@ -1119,6 +1119,8 @@ D1-D2
 conf t
 int range g1/0/3,g1/0/8
 shut
+switchport trunk allowed vlan 10,20,100
+switchport mode trunk
 channel-protocol lacp
 channel-group 1 mode active
 no shut
@@ -1126,6 +1128,7 @@ exit
 !
 int port-channel 1
  switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
 exit
 
 
@@ -1134,12 +1137,15 @@ exit
 conf t
 int range g1/0/1,g1/0/8
 shut
+switchport trunk allowed vlan 10,20,100
+switchport mode trunk
 channel-protocol lacp
 channel-group 1 mode passive
 no shut
 exit
 
 int port-channel 2
+ switchport trunk allowed vlan 10,20,100
  switchport mode trunk
 exit
 
