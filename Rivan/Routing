@@ -1086,18 +1086,12 @@ exit
 Configure Etherchannel @D1, @D2, @A1, @A2 
 ==================================================================
 
---------------------------
-ETHERCHANNEL PR	: LACP
-PORT-CHANNEL	: 1
-MODE			      : ACTIVE
-INT				      : F0/3, F0/4
-------------------------------
 
 D1-D2
 -------------
 @D1
 conf t
-int range g1/0/3,g1/0/8
+int range g1/0/5-6
 shut
 channel-protocol lacp
 channel-group 1 mode active
@@ -1112,16 +1106,14 @@ exit
 
 @D2
 conf t
-int range g1/0/1,g1/0/8
-shut
-switchport trunk allowed vlan 10,20,100
-switchport mode trunk
-channel-protocol lacp
-channel-group 1 mode passive
-no shut
+int range g1/0/5-6
+ shut
+ channel-protocol lacp
+ channel-group 1 mode passive
+ no shut
 exit
 
-int port-channel 2
+int port-channel 1
  switchport trunk allowed vlan 10,20,100
  switchport mode trunk
 exit
@@ -1133,31 +1125,34 @@ D1-A1
 ------------
 @D1
 conf t
-int range g1/0/2,g1/0/6
+default int range g1/0/1-2
+int range g1/0/1-2
 shut
 channel-protocol lacp
-channel-group 3 mode active
+channel-group 2 mode active
 no shut
 exit
 !
-int port-channel 3
+int port-channel 2
  switchport mode trunk
  switchport trunk allowed vlan 10,20,100
+ no shut
 exit
 
 
 @A1
 conf t
-int range g1/0/2,g1/0/5
+int range g1/0/1-2
 shut
 channel-protocol lacp
-channel-group 4 mode passive
+channel-group 2 mode passive
 no shut
 exit
 !
-int port-channel 4
+int port-channel 2
  switchport mode trunk
  switchport trunk allowed vlan 10,20,100
+ no shut
 exit
 
 
