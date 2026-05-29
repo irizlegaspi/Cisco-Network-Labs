@@ -1086,15 +1086,17 @@ exit
 Configure Etherchannel @D1, @D2, @A1, @A2 
 ==================================================================
 
-
-D1-D2
--------------
+========================================
+LACP
 @D1
 conf t
+default int range g1/0/5-6
 int range g1/0/5-6
 shut
 channel-protocol lacp
 channel-group 1 mode active
+switchport mode trunk
+switchport trunk allowed vlan 10,20,100
 no shut
 exit
 !
@@ -1106,10 +1108,13 @@ exit
 
 @D2
 conf t
+default int range g1/0/5-6
 int range g1/0/5-6
  shut
  channel-protocol lacp
  channel-group 1 mode passive
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
  no shut
 exit
 
@@ -1120,17 +1125,18 @@ exit
 
 
 
+========================================
 
-D1-A1
-------------
 @D1
 conf t
 default int range g1/0/1-2
 int range g1/0/1-2
-shut
-channel-protocol lacp
-channel-group 2 mode active
-no shut
+ shut
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+ channel-protocol lacp
+ channel-group 2 mode active
+ no shut
 exit
 !
 int port-channel 2
@@ -1142,11 +1148,14 @@ exit
 
 @A1
 conf t
+default int range g1/0/1 - 2
 int range g1/0/1-2
-shut
-channel-protocol lacp
-channel-group 2 mode passive
-no shut
+ shut
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+ channel-protocol lacp
+ channel-group 2 mode passive
+ no shut
 exit
 !
 int port-channel 2
@@ -1154,6 +1163,143 @@ int port-channel 2
  switchport trunk allowed vlan 10,20,100
  no shut
 exit
+
+
+========================================
+@D2
+conf t
+default int range g1/0/3-4
+int range g1/0/3-4
+ shut
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+ channel-protocol lacp
+ channel-group 3 mode active
+ no shut
+exit
+!
+int port-channel 3
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+ no shut
+exit
+
+
+@A2
+conf t
+default int range g1/0/1 - 2
+int range g1/0/1-2
+ shut
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+ channel-protocol lacp
+ channel-group 3 mode passive
+ no shut
+exit
+!
+int port-channel 3
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+ no shut
+exit
+
+
+===========================================
+PAGP
+========================================
+@D1
+conf t
+default int range g1/0/3 - 4
+int range g1/0/3-4
+ shut
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+ channel-protocol pagp
+ channel-group 4 mode auto
+ no shut
+exit
+!
+int port-channel 4
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+ no shut
+exit
+
+
+@A2
+conf t
+default int range g1/0/3 - 4
+int range g1/0/3-4
+ shut
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+ channel-protocol pagp
+ channel-group 4 mode desirable
+ no shut
+exit
+!
+int port-channel 4
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+ no shut
+exit
+
+
+========================================
+
+
+@D2
+conf t
+default int range g1/0/1 - 2
+int range g1/0/1-2
+ shut
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+ channel-protocol pagp
+ channel-group 5 mode auto
+ no shut
+exit
+!
+int port-channel 5
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+ no shut
+exit
+
+
+@A1
+conf t
+default int range g1/0/3 - 4
+int range g1/0/3-4
+ shut
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+ channel-protocol pagp
+ channel-group 5 mode desirable
+ no shut
+exit
+!
+int port-channel 5
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,100
+ no shut
+exit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
