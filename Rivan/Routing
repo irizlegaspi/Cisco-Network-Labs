@@ -1,4 +1,4 @@
-@All Network Devices Basic Configuration: Change the Banner only
+@All Network Devices Basic Configuration: Change the Banner and hostname only
 en
 conf t
 hostname S2
@@ -29,35 +29,36 @@ exit
 ----------------------------------------------------
 Assigned IP Address on P1, P2, S1, S2 End devices
 ----------------------------------------------------
-@P1
+@P1 - assigned to VLAN 10
 conf t
 int G0/0
-ip address 10.2.1.101 255.255.255.0
-no shut
+ ! ip address 10.2.1.101 255.255.255.0
+ ip address dhcp
+ no shut
 exit
 
-@P2
+@P2 - Assigned to VLAN 10
 conf t
 int G0/0
-ip address 10.2.1.102 255.255.255.0
-Assigned to VLAN 10
-no shut
+ ! ip address 10.2.1.102 255.255.255.0
+ ip address dhcp
+ no shut
 exit
-
 
 @S1
 conf t
-int G0/0
-ip address 192.168.1.133 255.255.255.224
-no shut
+ int G0/0
+ ! ip address 192.168.1.133 255.255.255.224
+ ip address dhcp
+ no shut
 exit
-
 
 @S2
 conf t
 int G0/0
-ip address 10.2.2.133 255.255.255.0
-no shut
+ ! ip address 10.2.2.133 255.255.255.0
+ ip address dhcp
+ no shut
 exit
 
 
@@ -107,7 +108,7 @@ Assigned VLAN to Switchport
 ------------------------------
 @A1
 conf t
-int g1/0/1
+int range g1/0/5 - 6
  switchport mode access
  switchport access vlan 10
  spanning-tree portfast
@@ -117,7 +118,7 @@ exit
 
 @A2
 conf t
-int g1/0/1
+int range g1/0/5 - 6
  switchport mode access
  switchport access vlan 10
  spanning-tree portfast
@@ -205,7 +206,7 @@ Configure Trunk Ports on All L3 SW @D1, @D2, @A1, @A2
 ---------------------------------------------------------------
 @D1
 conf t
- int range g1/0/1-6
+ int range g1/0/1 - 6
  switchport mode trunk
  switchport trunk allowed vlan 10,20,100
 no shut
@@ -221,7 +222,7 @@ exit
 
 @D2
 conf t
-int range g1/0/1-6
+int range g1/0/1 - 6
  switchport mode trunk
  switchport trunk allowed vlan 10,20,100
 exit
@@ -235,14 +236,14 @@ exit
 
 @A1
 conf t
-int range g1/0/1-4
+int range g1/0/1 - 4
  switchport mode trunk
  switchport trunk allowed vlan 10,20,100
 exit
 
 @A2
 conf t
-int range g1/0/2-4
+int range g1/0/1 - 4
 switchport mode trunk
 switchport trunk allowed vlan 10,20,100
 no shut
@@ -478,9 +479,9 @@ Default Floating Static Default Route
 @P1
 conf t
  ip route 0.0.0.0 0.0.0.0 10.2.1.1 1
-  ! D1 Primary
+  ! D1 - VLAN 10 10.2.1.1 /24 - Primary 
  ip route 0.0.0.0 0.0.0.0 10.2.1.2 10
-  ! D2 Secondary
+  ! D2 VLAN 10 10.2.1.2 /24 - Secondary
 end
 
 @PC2
@@ -495,13 +496,13 @@ exit
 @S1 
 conf t
 ip route 0.0.0.0 0.0.0.0 192.168.1.129 1
-ip route 0.0.0.0 0.0.0.0 192.168.1.130 2
+ip route 0.0.0.0 0.0.0.0 192.168.1.130 5
 exit
 
 @S2
 conf t
 ip route 0.0.0.0 0.0.0.0 10.2.2.2 1
-ip route 0.0.0.0 0.0.0.0 10.2.2.1 2
+ip route 0.0.0.0 0.0.0.0 10.2.2.1 5
 exit
 
 
@@ -581,6 +582,7 @@ exit
 conf t
 int g0/0
 ip ospf priority 255
+! the router with the higher ospf priority will become the DR
 exit
 !
 router ospf 1
@@ -595,6 +597,7 @@ exit
 conf t
 int g0/0
 ip ospf priority 0
+! router becomes DROTHER only
 exit
 !
 router ospf 1
@@ -618,6 +621,7 @@ Redistribution EIGRP and OSPF and Route Propagation
 conf t
 router ospf 1
 redistribute eigrp 100 subnets
+! redistribute eigrp <AS #> subnets
 exit
 !
 router eigrp 100
@@ -631,6 +635,9 @@ exit
 conf t
  router ospf 1
  default-information originate
+! Tells OSPF “advertise a default route (0.0.0.0/0) to all OSPF neighbors.
+! If I (R4) have a default route in my routing table, advertise it into OSPF as an LSA Type‑5 so all OSPF routers use me as the exit to the internet.
+! This is how you make R4 the OSPF domain’s gateway of last resort.
 end
 
 
