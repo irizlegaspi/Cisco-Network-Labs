@@ -1,1 +1,763 @@
+MULTILAYER SWITCHING
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+
+Router is configured with inter VLAN routing. In inter VLAn routing, router is in-charge of the following:
+1. Inter vlan router
+2. routing of packets to internet
+3. routing of packets to branch offices
+
+
+L3SW - Device use for multilayer switching
+- Can operates both at layer 2 and later 3.
+- can check layer 3 IP Addresses.
+- Relieves the work of router in inter VLAN router,
+- the ROAS IP addresses will be configured to L3SW called SVI - Switch Virtual Interface
+
+
+
+
+==========================================================================================================
+1. Configure general configurations on all devices. All passwords must be 'cisco' and must be encrypted.
+
+
+R1
+---
+conf t
+hostname R1
+enable secret cisco
+service password-encryption
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+banner login &
+====================
+      ** R1 ** 
+==================== &
+exit
+
+
+R2
+---
+conf t
+hostname R2
+enable secret cisco
+service password-encryption
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+banner login &
+====================
+      ** R2 ** 
+==================== &
+exit
+
+
+L3SW
+----
+conf t
+hostname L3SW
+enable secret cisco
+service password-encryption
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0 
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+banner login &
+====================
+    ** L3SW ** 
+==================== &
+exit
+
+SW1
+----
+conf t
+hostname SW1
+enable secret cisco
+service password-encryption
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+banner motd &
+====================
+    ** SW1 ** 
+==================== &
+exit
+
+SW2
+-----
+conf t
+hostname SW2
+enable secret cisco
+service password-encryption
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+banner motd &
+====================
+    ** SW2 ** 
+==================== &
+exit
+
+
+SW3
+----
+conf t
+hostname SW3
+enable secret cisco
+service password-encryption
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+banner motd &
+====================
+    ** SW3 ** 
+==================== &
+exit
+
+SW4
+----
+conf t
+hostname SW4
+enable secret cisco
+service password-encryption
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+exit
+!
+banner motd &
+====================
+    ** SW4 ** 
+==================== &
+exit
+
+
+
+==========================================================================================================
+2. Configure R1 and R2's serial interfaces. Clock rate must be 128000.
+
+R1
+---
+conf t
+int s0/0
+ip address 50.0.0.1 255.255.255.0
+no shut
+exit
+
+R2
+----
+conf t
+int s0/0
+ip address 50.0.0.2 255.255.255.0
+clock rate 128000
+no shut
+exit
+
+VERIFY
+sh ip int br
+sh int s0/0
+sh run | section interface Serial0/0
+
+
+
+==========================================================================================================
+3. Configure the f0/0 interface of R1, give it an IP address of 192.168.1.1/24.
+
+
+R1
+----
+conf t
+int f0/0
+ip address 192.168.1.1 255.255.255.0 -- (To be removed later)
+no shut
+exit 
+
+! VERIFY
+sh ip int br
+sh int s0/0
+sh run | section interface FastEthernet0/0
+
+
+
+==========================================================================================================
+4. Configure sub-interfaces on R2's f0/0 interface. f0/0.1 must be a member of Vlan 1, 
+f0/0.10 must be a member of vlan 10.
+
+- ROAS -
+
+R2
+----
+conf t
+int f0/0
+no ip address
+no shut
+exit
+!
+int f0/0.1
+encapsulation dot1q 1
+ip address 172.16.40.1 255.255.255.0
+no shut
+exit
+!
+int f0/0.10
+encapsulation dot1q 10
+ip address 172.16.50.1 255.255.255.0
+no shut 
+exit
+
+! VERIFY
+sh ip int br
+
+
+==========================================================================================================
+4.1. On SW4, configure the interface that is connected to R2 as a trunk interface.
+
+
+SW4
+----
+conf t
+int f0/1
+switchport mode trunk
+no shut
+exit
+
+! VERIFY
+sh int trunk
+sh ip int 
+
+
+
+==========================================================================================================
+5. Configure the Vlan 1 IP Addresses on all switches.
+
+
+L3SW
+-----
+! conf t
+! int vlan 1
+! ip address 192.168.1.40 255.255.255.0
+! no shut
+! exit
+
+
+SW1
+----
+conf t
+int vlan 1
+ip address 192.168.1.10 255.255.255.0
+no shut
+exit
+
+SW2
+----
+conf t
+int vlan 1
+ip address 192.168.1.20 255.255.255.0
+no shut
+exit
+
+SW3
+----
+conf t
+int vlan 1
+ip address 192.168.1.30 255.255.255.0
+no shut
+exit
+
+SW4
+----
+conf t
+int vlan 1
+ip address 172.16.40.4 255.255.255.0
+no shut
+exit
+
+! VERIFY
+sh ip int br
+
+
+==========================================================================================================
+6. Configure all Interswitch connections (interfaces) to be trunk interfaces. 
+
+Switch to Switch or Switch to router, Router to Router
+
+L3SW
+-----
+conf t
+int f0/2
+switchport trunk encapsulation dot1q
+switchport mode trunk
+no shut
+exit
+
+SW1
+----
+conf t
+int range f0/1 - 3
+switchport mode trunk
+no shut
+exit
+
+
+SW2
+----
+conf t
+int range f0/1 - 2
+switchport mode trunk
+no shut
+exit
+
+
+SW3
+---
+conf t
+int range f0/1, f0/3
+switchport mode trunk
+no shut
+exit
+
+! VERIFY
+sh int trunk
+sh int f0/2 swichport
+
+
+==========================================================================================================
+7. Create Vlans 10, 20, 30, and 40 on L3SW, and only Vlan 10 on SW4.
+
+
+L3SW
+----
+conf t
+vlan 10
+vlan 20
+vlan 30
+vlan 40
+exit
+
+
+SW4
+----
+conf t
+vlan 10
+exit
+
+==========================================================================================================
+8. Propagate vlans on SW1, SW2 and SW3 using VTP. L3SW must be configured as server, all remaining 
+switches must be vtp clients. Use the domain name "mnet", and password "cisco".
+
+
+L3SW
+-----
+conf t
+vtp mode server
+vtp version 2
+vtp domain mnet
+vtp password cisco
+exit
+
+
+SW1, SW2, SW3
+---------------
+conf t
+vtp mode client
+vtp version 2
+vtp domain mnet
+vtp password cisco
+exit
+
+! VERIFY
+sh vlan br
+
+
+
+==========================================================================================================
+9. Configure the interfaces where the PCs are connected to its proper Vlans.
+
+SW2
+----
+conf t
+int f0/3
+switchport mode access
+switchport access vlan 10
+no shut
+exit
+!
+int f0/4
+switchport mode access
+switchport acces vlan 20
+no shut
+exit
+
+
+SW3
+----
+conf t
+int f0/4
+switchport mode access
+switchport access vlan 30
+no shut
+exit
+!
+int f0/5
+switchport mode access
+switchport access vlan 40
+no shut
+exit
+
+
+SW4
+-----
+conf t
+int f0/2
+switchport mode access
+switchport access vlan 10
+no shut
+exit
+
+! VERIFY
+sh int trunk
+sh int f0/3 switchport
+
+
+
+==========================================================================================================
+10. Configure the corresponding IP addresses and default gateways on all computers.
+
+
+
+
+
+
+
+
+==========================================================================================================
+11. Test all connections of VLAN1
+
+ping R1 to R2 - must have ping
+- ping 50.0.0.2
+- ping 50.0.0.1
+
+Test #3 and #5, From R1 ping SW1, SW2, SW3 and L3SW - should have ping
+- ping 192.168.1.10 - SW1
+- ping 192.168.1.20 - SW2
+- ping 192.168.1.30 - SW3
+- ! ping 192.168.1.40 - L3SW
+
+
+Test #4
+R2 VERIFY
+sh ip int br
+Interface              IP-Address      OK? Method Status                Protocol 
+FastEthernet0/0        unassigned      YES unset  up                    up 
+FastEthernet0/0.1      172.16.60.1     YES manual up                    up 
+FastEthernet0/0.10     172.16.50.1     YES manual up                    up 
+
+Test #4.1
+SW4 VERIFY
+sh ip int br
+sh int trunk
+
+
+TEst #6
+VERIFY SW1, SW2, SW3
+sh int trunk
+
+Test #7
+L3SW, SW1, SW2, SW3
+sh vlan br
+
+
+
+==========================================================================================================
+
+CONFIGURE MULTISWITCH:
+
+
+12. Remove the ip add 192.168.1.1 /24 from f0/0 R1 and put it in L3SW f0/1
+R1
+---
+conf t
+int f0/0
+no ip address 
+exit
+
+! VERIFY
+sh ip int br
+
+
+==========================================================================================================
+13. Configure SVIs (Switch Virtual Interface) on L3SW 
+- counter part of ROAS sub interface configuration in R1 ROAS
+
+
+
+L3SW
+------
+conf t
+int vlan 1
+ip address 192.168.1.1 255.255.255.0
+no shut
+exit
+
+Verify: L3SW
+#sh ip int br
+
+
+
+
+! TEST
+From L3SW ping SW1, SW2, SW3 Vlan1
+ping 192.168.1.10 - SW
+ping 192.168.1.20 - SW2
+ping 192.168.1.30 - SW3
+
+
+
+
+! Create SVIs - ETO ANG GATEWAY NG MGA PC
+L3SW
+-----
+conf t
+int vlan 10
+ip address 192.168.10.1 255.255.255.0
+no shut
+exit
+!
+int vlan 20
+ip address 192.168.20.1 255.255.255.0
+no shut
+exit
+!
+int vlan 30
+ip address 192.168.30.1 255.255.255.0
+no shut
+exit
+!
+int vlan 40
+ip address 192.168.40.1 255.255.255.0
+no shut
+exit
+exit
+
+
+VERIFY
+sh ip int br
+
+
+
+
+
+! Create vlan 50 on L3SW to check the SVI# 
+-----------------------------------------
+ 
+L3SW
+-----
+!
+int vlan 50
+ip add 192.168.50.1 255.255.255.0
+no shut
+exit
+!
+
+ if the VLAN is down, down, the solution is to include it in the list of VLANs:
+
+Solution:
+L3SW:
+conf t
+vlan 50
+exit
+
+VERIFY
+sh ip int br
+
+
+! TEST the connection of default GW from PCs
+PC1
+
+ping 192.168.10.1
+
+---
+PC2
+
+ping 192.168.20.1
+
+---
+PC3
+ping 192.168.30.1
+
+
+---
+PC4
+ping 192.168.40.1
+
+
+
+! TEST THE INTERVLAN CONNECTIVITY
+PC1 ping P2 - no ping
+PC2 ping PC4 -  no ping
+
+
+ 
+! FOR THE LAYER 3 SWITCH TO BE ABLE TO EXECUTE INTERVLAN ROUTING-communicating other computer in another vlan/network
+WE NEED TO ACTIVATE THE ROUTING FUNCTION: ip routing
+----------------------------------------
+
+
+L3SW
+-----
+conf t
+ip routing
+exit
+
+
+! TEST AGAIN THE INTERVLAN CONNECTIVITY
+PC1 ping P2 - should have ping
+PC2 ping PC4 -  should have ping
+
+
+==========================================================================================================
+14. Configure L3SW and R1 link to be able to connect
+WE NEED TO MAKE R1-L3SW TO BE AN L3 LINK, WE NEED TO MAKE L3SW F0/1 A ROUTED PORT, FROM L2SW TO L3SW ROUTED PORT.
+
+
+L3SW
+-----
+conf t
+int f0/1
+! ROUTED PORT- making this port an interface connected to a router to be able to execute a routing function
+no switchport
+ip add 10.10.10.2 255.255.255.0
+no shut
+exit
+
+
+R1
+-----
+conf t
+int f0/0
+ip add 10.10.10.1 255.255.255.0
+no shut
+exit
+
+
+! VERIFY
+sh ip int br
+
+! TEST
+From R1 ping L3SW
+ping 10.10.10.2
+
+
+
+==========================================================================================================
+15. Configure Dynamic Routing
+
+L3SW
+------
+conf t
+router eigrp 100
+! wildcard mask matching statement
+network 192.168.0.0   0.0.255.255
+! no need of wildcard mask because it is only one network
+network 10.10.10.0
+no auto-summary 
+exit
+
+R1
+----
+conf t
+router eigrp 100
+! no need of wildcard mask because it is only one network
+network 10.10.10.0
+network 50.0.0.0 
+no auto-summary
+exit
+
+
+R2
+----
+conf t
+router eigrp 100
+network 50.0.0.0
+network 172.16.0.0   0.0.255.255
+no auto-summary
+exit
+
+
+
+! VERIFY
+sh ip route
+
+Test the server from pc1, pc2, pc3, and pc4 to server
+
+
+
 
