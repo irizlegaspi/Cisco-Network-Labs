@@ -284,10 +284,14 @@ sh ip int br
 SW4
 ----
 conf t
-int f0/1
-switchport mode trunk
-no shut
+ int f0/1
+ switchport mode trunk
+ switchport trunk allowed vlan 1,10
+ no shut
 exit
+
+ip default-gateway 172.16.40.1
+
 
 ! VERIFY
 sh int trunk
@@ -296,16 +300,16 @@ sh ip int
 
 
 ==========================================================================================================
-5. Configure the Vlan 1 IP Addresses on all switches.
+5. Configure the VLAN 1 IP Addresses on all switches.
 
 
 L3SW
 -----
-! conf t
-! int vlan 1
-! ip address 192.168.1.40 255.255.255.0
-! no shut
-! exit
+conf t
+int vlan 1
+ip address 192.168.1.1 255.255.255.0
+no shut
+exit
 
 
 SW1
@@ -354,6 +358,7 @@ L3SW
 conf t
 int f0/2
 switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,10,20,30,40,50
 switchport mode trunk
 no shut
 exit
@@ -363,6 +368,7 @@ SW1
 conf t
 int range f0/1 - 3
 switchport mode trunk
+switchport trunk allowed vlan 1,10,20,30,40,50
 no shut
 exit
 
@@ -372,6 +378,7 @@ SW2
 conf t
 int range f0/1 - 2
 switchport mode trunk
+switchport trunk allowed vlan 1,10,20,30,40,50
 no shut
 exit
 
@@ -381,6 +388,7 @@ SW3
 conf t
 int range f0/1, f0/3
 switchport mode trunk
+switchport trunk allowed vlan 1,10,20,30,40,50
 no shut
 exit
 
@@ -498,6 +506,19 @@ sh int f0/3 switchport
 
 
 
+Create the VLAN 1 Default Gateway on @SW1, SW2, SW3
+-----------------------------------------------------
+
+@SW1, @SW2, @SW3
+
+conf t
+ ip default-gateway 192.168.1.1
+end
+write mem
+
+
+
+
 ==========================================================================================================
 11. Test all connections of VLAN1
 
@@ -505,7 +526,7 @@ ping R1 to R2 - must have ping
 - ping 50.0.0.2
 - ping 50.0.0.1
 
-Test #3 and #5, From R1 ping SW1, SW2, SW3 and L3SW - should have ping
+Test #3 and #5, From R1 ping the VLAN1 of SW1, SW2, SW3 and L3SW - should have ping
 - ping 192.168.1.10 - SW1
 - ping 192.168.1.20 - SW2
 - ping 192.168.1.30 - SW3
@@ -570,9 +591,6 @@ exit
 Verify: L3SW
 #sh ip int br
 
-
-
-
 ! TEST
 From L3SW ping SW1, SW2, SW3 Vlan1
 ping 192.168.1.10 - SW
@@ -610,7 +628,6 @@ exit
 
 VERIFY
 sh ip int br
-
 
 
 
@@ -727,7 +744,7 @@ router eigrp 100
 ! wildcard mask matching statement
 network 192.168.0.0   0.0.255.255
 ! no need of wildcard mask because it is only one network
-network 10.10.10.0
+network 10.10.10.0 0.0.0.3
 no auto-summary 
 exit
 
@@ -736,8 +753,8 @@ R1
 conf t
 router eigrp 100
 ! no need of wildcard mask because it is only one network
-network 10.10.10.0
-network 50.0.0.0 
+network 10.10.10.0 0.0.0.3
+network 50.0.0.0 0.0.0.3
 no auto-summary
 exit
 
@@ -746,8 +763,8 @@ R2
 ----
 conf t
 router eigrp 100
-network 50.0.0.0
-network 172.16.0.0   0.0.255.255
+network 50.0.0.0 0.0.0.3
+network 172.16.0.0 0.0.255.255
 no auto-summary
 exit
 
@@ -757,6 +774,121 @@ exit
 sh ip route
 
 Test the server from pc1, pc2, pc3, and pc4 to server
+
+
+
+
+
+=====================================
+
+Spanning Tree
+
+@L3SW
+conf t
+ spanning-tree mode rapid-pvst
+ spanning-tree vlan 1,10-50 root primary
+ ! or
+ ! spanning-tree vlan 1,10-50 priority 4096
+end
+ 
+
+@SW1
+conf t
+ spanning-tree mode rapid-pvst
+ spanning-tree vlan 1,10-50 priority 8192
+ ! or:
+ ! spanning-tree vlan 1,10-50 root secondary
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
