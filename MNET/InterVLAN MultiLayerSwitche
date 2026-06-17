@@ -80,10 +80,10 @@ banner login &
 exit
 
 
-L3SW
+L3S1
 ----
 conf t
-hostname L3SW
+hostname L3S1
 enable secret cisco
 service password-encryption
 no ip domain-lookup
@@ -107,6 +107,47 @@ banner login &
     ** L3SW **
 ==================== &
 exit
+
+
+L3S2
+----
+conf t
+hostname L3S2
+enable secret cisco
+service password-encryption
+no ip domain-lookup
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0
+logging synchronous
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+logging synchronous
+exit
+!
+banner login &
+====================
+    ** L3S2 **
+==================== &
+exit
+
+
+
+
+
+
+
+
+
+
+
+
 
 SW1
 ----
