@@ -515,7 +515,7 @@ exit
 switches must be vtp clients. Use the domain name "mnet", and password "cisco".
 
 
-L3SW
+L3S1
 -----
 conf t
 vtp mode server
@@ -525,8 +525,8 @@ vtp password cisco
 exit
 
 
-SW1, SW2, SW3
----------------
+SW1, SW2, SW3, L3S2
+-------------------------
 conf t
 vtp mode client
 vtp version 2
@@ -760,7 +760,7 @@ L3SW
 -----
 !
 int vlan 50
-ip add 192.168.50.1 255.255.255.0
+ip add 192.168.50.2 255.255.255.0
 no shut
 exit
 !
@@ -865,7 +865,7 @@ conf t
 int f0/1
 ! ROUTED PORT- making this port an interface connected to a router to be able to execute a routing function
 no switchport
-ip add 10.10.10.2 255.255.255.0
+ip add 10.10.10.2 255.255.255.252
 no shut
 exit
 
@@ -874,7 +874,7 @@ R1
 -----
 conf t
 int f0/0
-ip add 10.10.10.1 255.255.255.0
+ip add 10.10.10.1 255.255.255.252
 no shut
 exit
 
@@ -970,9 +970,11 @@ exit
 
 =====================================
 ETHERCHANNEl
+@L3SW <> @SW1
+----------------
 
-@SW1-@L3SW
-
+@SW1
+----------
 conf t
 int range f0/1-2
 shutdown
@@ -988,7 +990,8 @@ switchport trunk encapsulation dot1q
  switchport trunk allowed vlan 10,20,30,40,50
 end
 
-@L3SW-@SW1
+@L3SW
+------------
 conf t
 int range f0/2-3
 shutdown
