@@ -114,6 +114,7 @@ Switch to Switch or Switch to router, Router to Router
 conf t
 int f0/2-3
 switchport trunk encapsulation dot1q
+switchport trunk native vlan 99
 switchport trunk allowed vlan 10,20,30,40,50
 switchport mode trunk
 switchport nonegotiate
@@ -126,6 +127,7 @@ exit
 conf t
 int range f0/2-3
 switchport trunk encapsulation dot1q
+switchport trunk native vlan 99
 switchport trunk allowed vlan 10,20,30,40,50
 switchport mode trunk
 switchport nonegotiate 
@@ -135,12 +137,12 @@ exit
 @SW1
 ----
 conf t
-int range f0/1-6
+int range f0/1-8
  switchport trunk native vlan 99
  switchport trunk allowed vlan 10,20,30,40,50
  switchport mode trunk
  switchport nonegotiate 
-no shut
+ no shut
 exit
 
 SW2
@@ -354,35 +356,56 @@ sh vlan br
 
 ==========================================================================================================
 CONFIGURE MULTISWITCH:
-! Create SVIs - ETO ANG GATEWAY NG MGA PC
-L3S1
------
+! Create SVIs for VLANS
+
+@L3S1:
+----------
 conf t
 int vlan 10
-ip address 192.168.10.1 255.255.255.0
-no shut
+ip address 192.168.10.2 255.255.255.0
 exit
-!
+
 int vlan 20
-ip address 192.168.20.1 255.255.255.0
-no shut
+ip address 192.168.20.2 255.255.255.0
 exit
-!
+
 int vlan 30
-ip address 192.168.30.1 255.255.255.0
-no shut
+ip address 192.168.30.2 255.255.255.0
 exit
-!
+
 int vlan 40
-ip address 192.168.40.1 255.255.255.0
-no shut
-exit
+ip address 192.168.40.2 255.255.255.0
 exit
 
 int vlan 50
-ip add 192.168.50.2 255.255.255.0
-no shut
+ip address 192.168.50.2 255.255.255.0
 exit
+
+
+@L3S2:
+----------
+conf t
+int vlan 10
+ip address 192.168.10.3 255.255.255.0
+exit
+
+int vlan 20
+ip address 192.168.20.3 255.255.255.0
+exit
+
+int vlan 30
+ip address 192.168.30.3 255.255.255.0
+exit
+
+int vlan 40
+ip address 192.168.40.3 255.255.255.0
+exit
+
+int vlan 50
+ip address 192.168.50.3 255.255.255.0
+exit
+
+
 
 
 VERIFY
@@ -430,13 +453,18 @@ spanning-tree bpduguard enable
 shutdown
 end
 
-
-VERIFY: sh vlan br, sh run | sec int
-
-@SW1, @SW2, @SW3
---------
+@L3S2
+-----
 conf t
-int range f0/7-24
+int range f0/4-24
+switchport mode access
+switchport access vlan 999
+spanning-tree portfast
+spanning-tree bpduguard enable
+shutdown
+exit
+
+int range g0/1-2
 switchport mode access
 switchport access vlan 999
 spanning-tree portfast
@@ -445,17 +473,37 @@ shutdown
 end
 
 
+VERIFY: sh vlan br, sh run | sec int
+
+@SW1, @SW2, @SW3
+--------
+conf t
+int range f0/9-24
+switchport mode access
+switchport access vlan 999
+spanning-tree portfast
+spanning-tree bpduguard enable
+shutdown
+end
 
  
 ! FOR THE LAYER 3 SWITCH TO BE ABLE TO EXECUTE INTERVLAN ROUTING-communicating other computer in another vlan/network
 WE NEED TO ACTIVATE THE ROUTING FUNCTION: ip routing
 ----------------------------------------
 
-
-L3S1
+@L3S1
 -----
 conf t
 ip routing
+ip route 0.0.0.0 0.0.0.0 10.10.10.1 
+exit
+
+
+@L3S2:
+--------
+conf t
+ip routing
+ip route 0.0.0.0 0.0.0.0 10.10.20.1 
 exit
 
 
@@ -465,11 +513,10 @@ PC2 ping PC4 -  should have ping
 
 
 ==========================================================================================================
-14. Configure L3SW and R1 link to be able to connect
-WE NEED TO MAKE R1-L3SW TO BE AN L3 LINK, WE NEED TO MAKE L3SW F0/1 A ROUTED PORT, FROM L2SW TO L3SW ROUTED PORT.
+14. Configure L3S1 and R1 link to be able to connect
+WE NEED TO MAKE R1-L3S1 TO BE AN L3 LINK, WE NEED TO MAKE L3SW F0/1 A ROUTED PORT, FROM L2SW TO L3SW ROUTED PORT.
 
-
-L3S1
+@L3S1
 -----
 conf t
 int f0/1
@@ -513,49 +560,66 @@ ping 10.10.10.2
 ==========================================================================================================
 15. Configure Dynamic Routing
 
-L3S1
+@L3S1
 ------
 conf t
 router eigrp 100
-! wildcard mask matching statement
-network 192.168.0.0   0.0.255.255
-! no need of wildcard mask because it is only one network
-network 10.10.10.0 0.0.0.3
-no auto-summary
+ passive-interface default
+ no passive-interface FastEthernet0/1
+ network 10.10.10.0 0.0.0.3
+ network 192.168.10.0
+ network 192.168.20.0
+ network 192.168.30.0
+ network 192.168.40.0
+ network 192.168.50.0
+ no auto-summary
 exit
 
-R1
+@L3S2
+---------
+router eigrp 100
+ passive-interface default
+ no passive-interface FastEthernet0/1
+ network 10.10.20.0 0.0.0.3
+ network 192.168.10.0
+ network 192.168.20.0
+ network 192.168.30.0
+ network 192.168.40.0
+ network 192.168.50.0
+exit
+
+
+@R1
 ----
 conf t
 router eigrp 100
-! no need of wildcard mask because it is only one network
-network 10.10.10.0 0.0.0.3
-network 50.0.0.0 0.0.0.3
-no auto-summary
+ network 10.10.10.0 0.0.0.3
+ network 50.0.0.0 0.0.0.3
+ network 10.10.20.0 0.0.0.3
+ no auto-summary
 exit
 
-R2
+@R2
 ----
 conf t
 router eigrp 100
-network 50.0.0.0 0.0.0.3
-network 172.16.0.0 0.0.255.255
-no auto-summary
+ network 172.16.0.0
+ network 50.0.0.0 0.0.0.3
+ no auto-summary
 exit
-
-
 
 ! VERIFY
-sh ip route
+#sh ip route
+#sh run | sec route
 
 Test the server from pc1, pc2, pc3, and pc4 to server
 
 
 =====================================
-
 Spanning Tree
 
 @L3S1
+-------------
 conf t
  spanning-tree mode rapid-pvst
  spanning-tree vlan 1,10-50 root primary
@@ -564,7 +628,8 @@ conf t
 end
  
 
-@SW1
+@L3S2
+----------
 conf t
  spanning-tree mode rapid-pvst
  spanning-tree vlan 1,10-50 priority 8192
@@ -573,16 +638,7 @@ conf t
 end
 
 
-=============================================
-@SW1 secured the ports
 
-conf t
- int range f0/7-24
- spanning-tree portfast
- spanning-tree bpduguard enable
- switchport access vlan 99
- shut
-exit
 
 =====================================
 ETHERCHANNEl
@@ -729,11 +785,8 @@ int port-channel3
  switchport trunk allowed vlan 10,20,30,40,50
 end
 
-
-
 @SW2
 ----------
-
 conf t
 int range f0/3-4
 shutdown
@@ -770,9 +823,114 @@ The path through FastEthernet 1/0 will get a higher metric.
 The routes via FastEthernet 0/0 (L3S1) will win, making it the single primary path in R1's routing table to match your active HSRP state.
 
 
+HSRP
+==============================================================================================
+VIP - Virtual IP Address
+
+@L3S1 - HSRP SVI
+vlan 10 192.168.10.2 255.255.255.0 VIP: 192.168.10.1
+vlan 20 192.168.20.2 255.255.255.0 VIP: 192.168.20.1
+vlan 30 192.168.30.2 255.255.255.0 VIP: 192.168.30.1
+vlan 40 192.168.40.2 255.255.255.0 VIP: 192.168.40.1
+vlan 50 192.168.50.2 255.255.255.0 VIP: 192.168.50.1
 
 
+@L3S2 HSRP SVI
+vlan 10 192.168.10.3 255.255.255.0 VIP: 192.168.10.1
+vlan 20 192.168.20.3 255.255.255.0 VIP: 192.168.20.1
+vlan 30 192.168.30.3 255.255.255.0 VIP: 192.168.30.1
+vlan 40 192.168.40.3 255.255.255.0 VIP: 192.168.40.1
+vlan 50 192.168.50.3 255.255.255.0 VIP: 192.168.50.1
 
+
+@L3S1 - ACTIVE 
+--------------------
+conf t
+int vlan 10
+description IT_USERS
+ip address 192.168.10.2 255.255.255.0
+standby 10 ip 192.168.10.1
+standby 10 priority 105
+standby 10 track fastEthernet 0/1
+standby 10 preempt
+exit
+
+int vlan 20
+description SALES_USERS
+ip address 192.168.20.2 255.255.255.0
+standby 20 ip 192.168.20.1
+standby 20 priority 105
+standby 20 track fastEthernet 0/1
+standby 20 preempt
+exit
+
+int vlan 30
+description HR_USERS
+ip address 192.168.30.2 255.255.255.0
+standby 30 ip 192.168.30.1
+standby 30 priority 105
+standby 30 track fastEthernet 0/1
+standby 30 preempt
+exit
+
+int vlan 40
+description FINANCE_USERS
+ip address 192.168.40.2 255.255.255.0
+standby 40 ip 192.168.40.1
+standby 40 priority 105
+standby 40 track fastEthernet 0/1
+standby 40 preempt
+exit
+
+int vlan 50
+description VLAN_MANAGEMENT
+ip address 192.168.50.2 255.255.255.0
+standby 50 ip 192.168.50.1
+standby 50 priority 105
+standby 50 track fastEthernet 0/1
+standby 50 preempt
+exit
+
+
+@L3S2 - STANDBY
+-------------------
+conf t
+int vlan 10
+ip address 192.168.10.3 255.255.255.0
+standby 10 ip 192.168.10.1
+standby 10 priority 100
+standby 10 preempt
+exit
+
+conf t
+int vlan 20
+ip address 192.168.20.3 255.255.255.0
+standby 20 ip 192.168.20.1
+standby 20 priority 100
+standby 20 preempt
+exit
+
+int vlan 30
+ip address 192.168.30.3 255.255.255.0
+standby 30 ip 192.168.30.1
+standby 30 priority 100
+standby 30 preempt
+exit
+
+int vlan 40
+ip address 192.168.40.3 255.255.255.0
+standby 40 ip 192.168.40.1
+standby 40 priority 100
+standby 40 preempt
+exit
+
+int vlan 50
+description VLAN_MANAGEMENT
+ip address 192.168.50.3 255.255.255.0
+standby 50 ip 192.168.50.1
+standby 50 priority 100
+standby 50 preempt
+exit
 
 
 
