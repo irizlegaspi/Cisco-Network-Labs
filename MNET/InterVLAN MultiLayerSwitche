@@ -1,3 +1,4 @@
+
 MULTILAYER SWITCHING - WITH HSRP and STP
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1129,8 +1130,23 @@ end
 ================================
 
 
+Change the delay metrics or r1 to avoid doing the load balancing.
 
+@R1
+----
+int f1/0
+delay 2000
+end
 
+VERIFY:
+#sh int f1/0 -- check the delay 
+#show ip eigrp topology
+#sh ip route eigrp
+
+These will:
+R1 will add the new, higher delay to any route coming from 10.10.20.2 (L3S2).
+The path through FastEthernet 1/0 will get a higher metric.
+The routes via FastEthernet 0/0 (L3S1) will win, making it the single primary path in R1's routing table to match your active HSRP state.
 
 
 
