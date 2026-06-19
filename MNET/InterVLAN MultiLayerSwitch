@@ -17,10 +17,6 @@ L3SW - Device use for multilayer switching
 
 
 
-
-
-
-
 ==========================================================================================================
 2. Configure R1 and R2's serial interfaces. Clock rate must be 128000.
 
@@ -58,29 +54,11 @@ sh ip int br
 sh int s0/0
 sh run | section interface Serial0/0
 
-
-
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-3. Configure the f0/0 interface of R1, give it an IP address of 192.168.1.1/24.
-R1
-----
-conf t
-int f0/0
-ip address 192.168.1.1 255.255.255.0 -- (To be removed later)
-no shut
-exit
-! VERIFY
-sh ip int br
-sh int s0/0
-sh run | section interface FastEthernet0/0
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-
 ==========================================================================================================
 4. Configure sub-interfaces on R2's f0/0 interface. f0/0.1 must be a member of Vlan 1,
 f0/0.10 must be a member of vlan 10.
 
-- ROAS -
+- Router on a Stick - ROAS -
 
 R2
 ----
@@ -107,8 +85,7 @@ sh ip int br
 
 
 ==========================================================================================================
-4.1. On SW4, configure the interface that is connected to R2 as a trunk interface.
-
+4.1. On SW4, configure the interface that is connected to R2 as a trunk interface and SW4 default GW.
 
 SW4
 ----
@@ -121,62 +98,9 @@ exit
 
 ip default-gateway 172.16.40.1
 
-
 ! VERIFY
 sh int trunk
 sh ip int
-
-
-
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-5. Configure the VLAN 1 IP Addresses on all switches.----------- 
-REMOVED, VLAN MUST NOT BE USED FOR ENTERPRISE SET-UP !!!!!!!!!!!!
-
-L3SW
------
-conf t
-int vlan 1
-ip address 192.168.1.1 255.255.255.0
-no shut
-exit
-
-SW1
-----
-conf t
-int vlan 1
-ip address 192.168.1.10 255.255.255.0
-no shut
-exit
-
-SW2
-----
-conf t
-int vlan 1
-ip address 192.168.1.20 255.255.255.0
-no shut
-exit
-
-SW3
-----
-conf t
-int vlan 1
-ip address 192.168.1.30 255.255.255.0
-no shut
-exit
-
-SW4
-----
-conf t
-int vlan 1
-ip address 172.16.40.4 255.255.255.0
-no shut
-exit
-
-! VERIFY
-sh ip int br
-
-!!!!!!!!!!!! REMOVED, VLAN MUST NOT BE USED FOR ENTERPRISE SET-UP !!!!!!!!!!!!
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 
 
@@ -185,10 +109,10 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 Switch to Switch or Switch to router, Router to Router
 
-L3S1
+@L3S1
 -----
 conf t
-int f0/2
+int f0/2-3
 switchport trunk encapsulation dot1q
 switchport trunk allowed vlan 10,20,30,40,50
 switchport mode trunk
@@ -196,16 +120,28 @@ switchport nonegotiate
 no shut
 exit
 
-SW1
+
+@L3S2
+------
+conf t
+int range f0/2-3
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 10,20,30,40,50
+switchport mode trunk
+switchport nonegotiate 
+no shut
+exit
+
+@SW1
 ----
 conf t
 int range f0/1-6
  switchport trunk native vlan 99
  switchport trunk allowed vlan 10,20,30,40,50
  switchport mode trunk
+ switchport nonegotiate 
 no shut
 exit
-
 
 SW2
 ----
@@ -214,6 +150,7 @@ int range f0/1-4
  switchport trunk native vlan 99
  switchport trunk allowed vlan 10,20,30,40,50
  switchport mode trunk
+ switchport nonegotiate 
 no shut
 exit
 
@@ -225,19 +162,20 @@ int range f0/1-4
  switchport trunk native vlan 99
  switchport trunk allowed vlan 10,20,30,40,50
  switchport mode trunk
+ switchport nonegotiate 
 no shut
 exit
 
 ! VERIFY
 sh int trunk
-sh int f0/2 swichport
+sh int f0/2 switchport
 
 
 ==========================================================================================================
-7. Create Vlans 10, 20, 30, and 40 on L3SW, and only Vlan 10 on SW4.
+7. Create Vlans 10, 20, 30, and 40 on L3S1, and only Vlan 10 on SW4.
 
 
-L3SW
+L3S1
 ----
 conf t
 vlan 10
@@ -254,7 +192,6 @@ name ACCOUNTING
 
 vlan 50
 name MANAGEMENT
-
 
 vlan 99
 name NATIVE-VLAN
@@ -273,11 +210,11 @@ vlan 10
 exit
 
 ==========================================================================================================
-8. Propagate vlans on SW1, SW2 and SW3 using VTP. L3SW must be configured as server, all remaining
+8. Propagate vlans on SW1, SW2 and SW3 using VTP. L3S1 must be configured as server, all remaining
 switches must be vtp clients. Use the domain name "mnet", and password "cisco".
 
 
-L3S1
+@L3S1
 -----
 conf t
 vtp mode server
@@ -287,7 +224,7 @@ vtp password cisco
 exit
 
 
-SW1, SW2, SW3, L3S2
+@SW1, @SW2, @SW3, @L3S2
 -------------------------
 conf t
 vtp mode client
@@ -304,57 +241,60 @@ sh vlan br
 ==========================================================================================================
 9. Configure the interfaces where the PCs are connected to its proper Vlans.
 
-
-SW2
+@SW2
 ----
 conf t
 int f0/5
 switchport mode access
 switchport access vlan 10
+spanning-tree portfast
+spanning-tree bpduguard enable
 no shut
 exit
 !
 int f0/6
 switchport mode access
 switchport acces vlan 20
+spanning-tree portfast
+spanning-tree bpduguard enable
 no shut
 exit
 
-int range f0/5-24
+int range f0/7-24
+switchport access vlan 999
 switchport mode access
+sspanning-tree portfast
 spanning-tree bpduguard enable
-switchport access vlan 99
+shutdown
 exit
 
-int range f0/7-24
-shut
-
-
-SW3
+@SW3
 ----
 conf t
 int f0/5
 switchport mode access
 switchport access vlan 30
+spanning-tree portfast
+spanning-tree bpduguard enable
 no shut
 exit
 !
 int f0/6
 switchport mode access
 switchport access vlan 40
-no shut
-exit
-
-
-int range f0/5-24
 spanning-tree portfast
 spanning-tree bpduguard enable
+no shut
 exit
 
-int rang f0/7-24
-no shut
 
-
+int range f0/7-24
+switchport access vlan 999
+switchport mode access
+sspanning-tree portfast
+spanning-tree bpduguard enable
+shutdown
+exit
 
 SW4
 -----
@@ -362,129 +302,60 @@ conf t
 int f0/2
 switchport mode access
 switchport access vlan 10
+spanning-tree portfast
+spanning-tree bpduguard enable
 no shut
 exit
 
-
+int range f0/3-24
+switchport access vlan 999
+switchport mode access
+sspanning-tree portfast
+spanning-tree bpduguard enable
+shutdown
+exit
 
 
 ! VERIFY
 sh int trunk
 sh int f0/5 switchport
 
-
-
 ==========================================================================================================
 10. Configure the corresponding IP addresses and default gateways on all computers.
 
 
 
-
-
-
-
-
-Create the VLAN 1 Default Gateway on @SW1, SW2, SW3 -------------REMOVED
------------------------------------------------------
-
 @SW1, @SW2, @SW3
+---------------------------
 
 conf t
- ! ip default-gateway 192.168.1.1 - we change this to 10.10.10.1
- ip default-gateway 10.10.10.1
+ ip default-gateway 192.168.50.1
 write mem
 
 
-
-
-==========================================================================================================
-11. Test all connections of VLAN1 ---------------- DO NOT DO THIS!!!!
-
-Test #3 and #5, From R1 ping the VLAN1 of SW1, SW2, SW3 and L3SW - should have ping
-- ping 192.168.1.10 - SW1
-- ping 192.168.1.20 - SW2
-- ping 192.168.1.30 - SW3
-- ! ping 192.168.1.40 - L3SW
-
-
-
-
+VERIFY connection of R1 and R2
+------------------------------------
 ping R1 to R2 - must have ping
 - ping 50.0.0.2
 - ping 50.0.0.1
 
 
-
-
-Test #4
-R2 VERIFY
-sh ip int br
-Interface              IP-Address      OK? Method Status                Protocol
-FastEthernet0/0        unassigned      YES unset  up                    up
-FastEthernet0/0.1      172.16.60.1     YES manual up                    up
-FastEthernet0/0.10     172.16.50.1     YES manual up                    up
-
-Test #4.1
-SW4 VERIFY
-sh ip int br
+VERIFY Trunk Int
+--------------------------
+@L3S1, @L3S2 @SW1, @SW2, @SW3
 sh int trunk
 
-
-TEst #6
-VERIFY SW1, SW2, SW3
-sh int trunk
-
-Test #7
-L3SW, SW1, SW2, SW3
+Verify VLANS:
+--------------------
+@L3S1, @L3S2 @SW1, @SW2, @SW3
 sh vlan br
 
 
 
 ==========================================================================================================
-
 CONFIGURE MULTISWITCH:
-
-
-12. Remove the ip add 192.168.1.1 /24 from f0/0 R1 and put it in L3SW f0/1
-R1
----
-conf t
-int f0/0
-no ip address
-exit
-
-! VERIFY
-sh ip int br
-
-
-==========================================================================================================
-13. Configure SVIs (Switch Virtual Interface) on L3SW
-- counter part of ROAS sub interface configuration in R1 ROAS
-
-
-
-L3SW - removed, all VLAN 1 ip address will be removed
-------
-conf t
-int vlan 1
-ip address 192.168.1.1 255.255.255.0
-no shut
-exit
-
-Verify: L3SW
-#sh ip int br
-
-! TEST
-From L3SW ping SW1, SW2, SW3 Vlan1
-ping 192.168.1.10 - SW
-ping 192.168.1.20 - SW2
-ping 192.168.1.30 - SW3
-
-
-
-
 ! Create SVIs - ETO ANG GATEWAY NG MGA PC
-L3SW
+L3S1
 -----
 conf t
 int vlan 10
@@ -508,60 +379,37 @@ no shut
 exit
 exit
 
-
-VERIFY
-sh ip int br
-
-
-
-
-! Create vlan 50 for VLAN MANAGEMENT on L3SW to check the SVI#
-------------------------------------------------------------------
- 
-L3S1
------
-!
 int vlan 50
 ip add 192.168.50.2 255.255.255.0
 no shut
 exit
-!
 
- if the VLAN is down, down, the solution is to include it in the list of VLANs:
-
-Solution:
-L3SW:
-conf t
-vlan 50
-name VLAN-MANAGEMENT
-exit
 
 VERIFY
 sh ip int br
 
 
-! TEST the connection of default GW from PCs
-PC1
 
+! TEST the connection of default GW from PCs
+------------------------------------------------
+PC1
+-------
 ping 192.168.10.1
 
----
 PC2
-
+---
 ping 192.168.20.1
 
----
 PC3
+---
 ping 192.168.30.1
 
-
----
 PC4
+---
 ping 192.168.40.1
 
-
-
 ! TEST THE INTERVLAN CONNECTIVITY
+------------------------------------
 PC1 ping PC2 - no ping
 PC2 ping PC4 -  no ping
 
@@ -604,7 +452,7 @@ WE NEED TO ACTIVATE THE ROUTING FUNCTION: ip routing
 ----------------------------------------
 
 
-L3SW
+L3S1
 -----
 conf t
 ip routing
@@ -626,13 +474,22 @@ L3S1
 conf t
 int f0/1
 ! ROUTED PORT- making this port an interface connected to a router to be able to execute a routing function
-no switchport
 ip add 10.10.10.2 255.255.255.252
+no switchport
+no shut
+exit
+
+@L3S2
+-------------
+conf t
+int f0/1
+ip add 10.10.20.2 255.255.255.252
+no switchport 
 no shut
 exit
 
 
-R1
+@R1
 -----
 conf t
 int f0/0
@@ -640,14 +497,17 @@ ip add 10.10.10.1 255.255.255.252
 no shut
 exit
 
+int f1/0
+ip address 10.10.20.1 255.255.255.252
+no shut
+exit
 
 ! VERIFY
 sh ip int br
 
 ! TEST
-From R1 ping L3SW
+From R1 ping L3S1, L3S2
 ping 10.10.10.2
-
 
 
 ==========================================================================================================
@@ -674,7 +534,6 @@ network 50.0.0.0 0.0.0.3
 no auto-summary
 exit
 
-
 R2
 ----
 conf t
@@ -690,9 +549,6 @@ exit
 sh ip route
 
 Test the server from pc1, pc2, pc3, and pc4 to server
-
-
-
 
 
 =====================================
@@ -727,8 +583,6 @@ conf t
  switchport access vlan 99
  shut
 exit
-
-
 
 =====================================
 ETHERCHANNEl
