@@ -1,0 +1,233 @@
+==========================================================================================================
+1. Configure general configurations on all devices. All passwords must be 'cisco' and must be encrypted.
+
+
+@R1
+---
+conf t
+hostname R1
+enable secret cisco
+service password-encryption
+no ip domain-lookup
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0 0
+logging synchronous
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+logging synchronous
+exit
+!
+banner login &
+====================
+      ** R1 **
+==================== &
+exit
+
+
+@R2
+---
+conf t
+hostname R2
+enable secret cisco
+service password-encryption
+no ip domain-lookup
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0 0
+logging synchronous
+
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+logging synchronous
+exit
+!
+banner login &
+====================
+      ** R2 **
+==================== &
+exit
+
+
+@L3S1
+----
+conf t
+hostname L3S1
+enable secret cisco
+service password-encryption
+no ip domain-lookup
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0
+logging synchronous
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+logging synchronous
+exit
+!
+banner login &
+====================
+    ** L3S1 **
+==================== &
+exit
+
+
+@L3S2
+----
+conf t
+hostname L3S2
+enable secret cisco
+service password-encryption
+no ip domain-lookup
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0
+logging synchronous
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+logging synchronous
+exit
+!
+banner login &
+====================
+    ** L3S2 **
+==================== &
+exit
+
+
+@SW1
+----
+conf t
+hostname SW1
+enable secret cisco
+service password-encryption
+no ip domain-lookup
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0 0
+logging synchronous
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+logging synchronous
+exit
+!
+banner motd &
+====================
+    ** SW1 **
+==================== &
+exit
+
+@SW2
+-----
+conf t
+hostname SW2
+enable secret cisco
+service password-encryption
+no ip domain-lookup
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0 0
+logging synchronous
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+logging synchronous
+exit
+!
+banner motd &
+====================
+    ** SW2 **
+==================== &
+exit
+
+
+@SW3
+----
+conf t
+hostname SW3
+enable secret cisco
+service password-encryption
+no ip domain-lookup
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0 0
+logging synchronous
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+logging synchronous
+exit
+!
+banner motd &
+====================
+    ** SW3 **
+==================== &
+exit
+
+@SW4
+----
+conf t
+hostname SW4
+enable secret cisco
+service password-encryption
+no ip domain-lookup
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0 0
+logging synchronous
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+logging synchronous
+exit
+!
+banner motd &
+====================
+    ** SW4 **
+==================== &
+exit
