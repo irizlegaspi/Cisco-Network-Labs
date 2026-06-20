@@ -67,15 +67,17 @@ int f0/0
 no ip address
 no shut
 exit
-!
-int f0/0.1
-encapsulation dot1q 1
-ip address 172.16.40.1 255.255.255.0
-no shut
-exit
-!
+
+! VLAN 10 -IT
 int f0/0.10
 encapsulation dot1q 10
+ip address 172.16.10.1 255.255.255.0
+no shut
+exit
+
+! VLAN 50 - MANAGEMENT VLAN
+int f0/0.50
+encapsulation dot1q 50
 ip address 172.16.50.1 255.255.255.0
 no shut
 exit
@@ -96,7 +98,6 @@ conf t
  no shut
 exit
 
-ip default-gateway 172.16.40.1
 
 ! VERIFY
 sh int trunk
@@ -208,6 +209,16 @@ SW4
 ----
 conf t
 vlan 10
+name IT
+
+vlan 50 
+name Management
+
+vlan 99
+name Native
+
+vlan 999
+name Blackhole
 
 exit
 
@@ -309,7 +320,7 @@ spanning-tree bpduguard enable
 no shut
 exit
 
-int range f0/3-24
+int range f0/4-24
 switchport access vlan 999
 switchport mode access
 sspanning-tree portfast
@@ -406,6 +417,19 @@ ip address 192.168.50.3 255.255.255.0
 exit
 
 
+
+SW4
+-----
+conf t
+interface vlan 10
+ ip address 172.16.10.5 255.255.255.0
+no shutdown
+
+interface vlan 50
+ ip address 172.16.50.5 255.255.255.0
+no shutdown
+
+ip default-gateway 172.16.50.1
 
 
 VERIFY
