@@ -82,6 +82,14 @@ ip address 172.16.50.1 255.255.255.0
 no shut
 exit
 
+! VLAN 99 - NATIVE
+int f0/0.99
+encapsulation dot1q 99
+ip address 172.16.99.1 255.255.255.0
+no shut
+exit
+
+
 ! VERIFY
 sh ip int br
 
@@ -94,7 +102,7 @@ SW4
 conf t
  int f0/1
  switchport mode trunk
- switchport trunk allowed vlan 1,10
+ switchport trunk allowed vlan 10,50,99
  no shut
 exit
 
@@ -429,6 +437,11 @@ interface vlan 50
  ip address 172.16.50.5 255.255.255.0
 no shutdown
 
+interface vlan 99
+ ip address 172.16.99.5 255.255.255.0
+no shutdown
+
+
 ip default-gateway 172.16.50.1
 
 
@@ -627,7 +640,9 @@ exit
 ----
 conf t
 router eigrp 100
- network 172.16.0.0
+ network 172.16.10.0 0.0.0.255
+ network 172.16.50.0 0.0.0.255
+ network 172.16.99.0 0.0.0.255
  network 50.0.0.0 0.0.0.3
  no auto-summary
 exit
