@@ -960,6 +960,80 @@ exit
 
 
 
+===========================================================================================
+DHCP - DYNAMIC HOST CONTROL PROTOCOL
+
+DHCP SERVER:
+
+VLAN 10 - IT (server Side)
+Pool Name: VLAN10-IT-POOL
+Default Gateway: 172.16.10.1
+DNS Server: 8.8.8.8
+Start IP: 172.16.10.50
+End IP: 172.16.10.200
+Subnet Mask: 255.255.255.0
+
+VLAN 10 - IT (Core Side)
+Pool Name: VLAN10-IT-CORE-POOL
+Default Gateway: 192.168.10.1
+DNS Server: 8.8.8.8
+Start IP: 192.168.10.50
+End IP: 192.168.10.200
+Subnet Mask: 255.255.255.0
+
+
+VLAN 20 - SALES
+Pool Name: VLAN20
+Default Gateway: 192.168.20.1
+DNS Server: 8.8.8.8
+Start IP: 192.168.20.50
+End IP: 192.168.20.200
+Subnet Mask: 255.255.255.0
+
+VLAN 30 - HR
+Pool Name: VLAN30
+Default Gateway: 192.168.30.1
+DNS Server: 8.8.8.8
+Start IP: 192.168.30.50
+End IP: 192.168.30.200
+Subnet Mask: 255.255.255.0
+
+VLAN 40 - FINANCE
+Pool Name: VLAN40
+Default Gateway: 192.168.40.1
+DNS Server: 8.8.8.8
+Start IP: 192.168.40.50
+End IP: 192.168.40.200
+Subnet Mask: 255.255.255.0
+
+VLAN 50 - MANAGEMENT
+Pool Name: VLAN50
+Default Gateway: 172.16.50.1
+DNS Server: 8.8.8.8
+Start IP: 172.16.50.50
+End IP: 172.16.50.200
+Subnet Mask: 255.255.255.0
+
+
+DHCP Relay (ip helper-address)
+========================
+@L3S1 and @L3S2
+
+conf t
+interface vlan 10
+ ip helper-address 172.16.10.5
+
+interface vlan 20
+ ip helper-address 172.16.10.5
+
+interface vlan 30
+ ip helper-address 172.16.10.5
+
+interface vlan 40
+ ip helper-address 172.16.10.5
+
+interface vlan 50
+ ip helper-address 172.16.10.5
 
 
 
