@@ -1,0 +1,219 @@
+BGP - Border Gateway Protocol
+a type of routing protocol
+
+GENERAL TYPES OF ROUTING PROTOCOL
+1. IGP (iBGP)- Interior Gateway Protocol
+Routing within the same autonomous systems
+Ex. RIP, EIGRP, OSPF
+
+
+2. EGP (eBGP) - Exterior Gateway Protocol
+Routing within different autonomous systems
+Ex. BGP
+
+
+
+TYPES OF BGP
+1. iBGP
+BGP routing within the same AS
+
+
+2. eBGP
+BGP routing within different AS
+
+
+
+IGP		BGP
+Metrics		Path Attributes/PA
+
+Path Attributes of BGP:
+1. Origin
+2. AS Path
+
+
+2 Ways to connect to your ISP
+
+1. Default routing - simple internet
+2. BGP
+
+
+
+BGP
+Network/Subnet
+prefix/ Length = Network Layer Reachability Information (NLRI)
+
+
+BGP Design Topologies
+1. Singlehomed
+Single link per 1 ISP
+ISP will wait your network advertisement
+Router --------- 1 ISP
+
+2. Dualhomed
+2 Links per 1 ISP
+Used for load balancing
+
+Router 1 ------------ ISP 1
+	 ------------
+
+
+3. Single Multihomed
+
+Router 1 ------------ ISP 1
+	 ------------ ISP 2
+
+Router 1 --------- ISP 1
+Router 1 --------- ISP 1
+
+
+4. Dual Multihomed
+
+2 Links per ISP. 2 or more ISP
+
+Router 1 -------------- ISP 1
+	 --------------
+
+	 -------------- ISP 2
+	 --------------
+
+
+Router 1 -------------- ISP 1
+	 -------------- ISP 2
+
+
+
+Router 2 -------------- ISP 1
+	 -------------- ISP 2
+
+
+-------------------------------
+How do BGP routers establish neighbor relationships?
+1. Router tries to establish a TCP connection using port 179 and using 3-way handshake.
+(OSPF and EIGRP does not use TCP, UDP and port and does not use 3-way handshake, they only uses protocol)
+
+2.  When the 3 way handshake completes, BGP send its first packet called BGP OPEN MESSAGE = Hello
+
+
+3. If all parameters are ok and verified, the 2 routers would become neighbors, and will now be in the ESTABLISHED state.
+
+
+
+BGP Neighbor States:
+1. IDLE - BGP is administratively down, or is waiting for the next attempt (no neighbors yet).
+
+2. CONNECT 
+BGP  is waiting for TCP request connection to be completed
+3-way handshake state
+	SYNTAX:
+	conf t
+	router bgp <as#> (idle state)
+	neighbor  <ip addr> remote-as <as# of neighbor> (connect state)
+Once configured your router will send BGP TCP request
+
+- OSPF, EIGRP uses multicast addressing while BGP uses unicast
+
+
+
+-------------
+Good question, Riz! In BGP, the neighbor IP address you specify with neighbor <ip addr> remote-as <as#> doesn't necessarily have to be directly connected. Unlike OSPF or EIGRP, which rely on direct Layer 2 adjacency, BGP neighbors can establish sessions even if they're several hops away.
+
+However, if the neighbor is not directly connected, you'll need to ensure:
+
+The IP address is reachable (via an IGP like OSPF/EIGRP or static routes).
+
+You configure ebgp-multihop (neighbor <ip addr> ebgp-multihop <hops>), especially for eBGP neighbors, as eBGP by default expects direct connectivity.
+
+Your source interface or update-source is correctly set (neighbor <ip addr> update-source <interface>), particularly if using a loopback.
+
+For iBGP, the requirement for direct connection doesn't exist, but you must have full mesh connectivity or use route reflectors or confederations.
+
+Would you like me to break it down further or discuss scenarios where BGP behaves differently?
+--------------------
+
+
+
+3. ACTIVE
+Router trying to establish a TCP session but fails
+Router will try to re-establish TCP connection in this state.
+Router waiting for neighbors reply.
+
+       TCP req
+R1 -------------> R2
+       TCP reply
+   <------------
+       Port 179
+   <------------->
+     Sent Hello -Encapsulation- BGP TCP Requirements: AS# | BGP Payload: Src IP, Dest IP
+   -------------->
+     Open Sent
+   <-------------
+     Open Confirm 
+
+
+4. OPENSENT
+TCP connection is ok
+BGP Open ("hello") has been sent, but neighbor open message has not been received yet.
+
+5. OPENCONFIRM
+Open message are both sent and received
+Just waiting for a BGP keepalive message to check if there are neighbor parameter mismatch
+
+6. ESTABLISHED
+All neighbor parameters match, the neighbor relationship works & BGP peers can now exchange BGP updates.
+
+Scenario: Singlehomed
+Syntax:
+
+conf t
+router bgp <as#- own as#>
+neighbor <ip addr> remote <as# of neighbor>
+exit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
