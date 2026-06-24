@@ -4,43 +4,56 @@ a type of routing protocol
 GENERAL TYPES OF ROUTING PROTOCOL
 1. IGP (iBGP)- Interior Gateway Protocol
 Routing within the same autonomous systems
+Uses Metrics to determine best path
 Ex. RIP, EIGRP, OSPF
 
 
 2. EGP (eBGP) - Exterior Gateway Protocol
 Routing within different autonomous systems
+Uses metric called Path Attributes/PA
 Ex. BGP
+
+
+AS - Autonomus System - Group of network devices within the same organization or company.
 
 
 
 TYPES OF BGP
-1. iBGP
+1. iBGP - Implemetation of BGP within the same AS. 
 BGP routing within the same AS
 
-
-2. eBGP
+2. eBGP - implementation of BGP within different AS.
 BGP routing within different AS
 
 
 
-IGP		BGP
-Metrics		Path Attributes/PA
-
 Path Attributes of BGP:
-1. Origin
-2. AS Path
+1. Origin - used in CCNA
+2. AS Path - Used in CCNA
+3. next_Hop
+4. Local_Pref
+5. Atomic_Aggregate
+6. Aggregator
+7. Community
+8. Multi_Exit_Disc (MED)
+9. Originator ID
+10.Cluster List
+11. Multiprotocol Reachable NLRI
+12. Multiprotocol Unreachable NLRI
 
 
 2 Ways to connect to your ISP
-
-1. Default routing - simple internet
-2. BGP
-
+	1. Default routing - simple internet
+	2. BGP
 
 
-BGP
-Network/Subnet
-prefix/ Length = Network Layer Reachability Information (NLRI)
+
+
+IGP: Network/Subnet - 10.0.0.0 - Prefix /24 Lenght
+
+BGP: prefix/ Length = Network Layer Reachability Information (NLRI)
+NLRI - (Network layer Reachability information) - combination of Prefix and Lenght in BGP
+
 
 
 BGP Design Topologies
@@ -49,41 +62,43 @@ Single link per 1 ISP
 ISP will wait your network advertisement
 Router --------- 1 ISP
 
-2. Dualhomed
-2 Links per 1 ISP
+2. Dualhomed: 2 Links (with redanduncy) per 1 ISP
 Used for load balancing
+            Link 
+Router 1 ------------ ISP 1
+	    ------------
+
+
+3. Single Multihomed (multi links)
 
 Router 1 ------------ ISP 1
-	 ------------
-
-
-3. Single Multihomed
-
-Router 1 ------------ ISP 1
-	 ------------ ISP 2
+	     ------------ ISP 2
 
 Router 1 --------- ISP 1
-Router 1 --------- ISP 1
+Router 1 --------- ISP 2
 
 
-4. Dual Multihomed
-
-2 Links per ISP. 2 or more ISP
+4. Dual (links-redanduncy) Multihomed - 2 Links per ISP. 2 or more ISP
 
 Router 1 -------------- ISP 1
-	 --------------
+	     --------------
 
-	 -------------- ISP 2
-	 --------------
-
+	    -------------- ISP 2
+	    --------------
 
 Router 1 -------------- ISP 1
-	 -------------- ISP 2
-
-
+	     -------------- ISP 2
 
 Router 2 -------------- ISP 1
-	 -------------- ISP 2
+	     -------------- ISP 2
+
+With Cross over links
+Router 1 -------------- ISP 1
+	     -------------- ISP 2
+
+Router 2 -------------- ISP 1
+	     -------------- ISP 2
+
 
 
 -------------------------------
@@ -93,7 +108,6 @@ How do BGP routers establish neighbor relationships?
 
 2.  When the 3 way handshake completes, BGP send its first packet called BGP OPEN MESSAGE = Hello
 
-
 3. If all parameters are ok and verified, the 2 routers would become neighbors, and will now be in the ESTABLISHED state.
 
 
@@ -102,15 +116,15 @@ BGP Neighbor States:
 1. IDLE - BGP is administratively down, or is waiting for the next attempt (no neighbors yet).
 
 2. CONNECT 
-BGP  is waiting for TCP request connection to be completed
-3-way handshake state
-	SYNTAX:
-	conf t
-	router bgp <as#> (idle state)
-	neighbor  <ip addr> remote-as <as# of neighbor> (connect state)
-Once configured your router will send BGP TCP request
+ --> BGP  is waiting for TCP request connection to be completed
+ --> 3-way handshake state
+	 SYNTAX:
+	   conf t
+	   router bgp <as#> (idle state)
+	   neighbor  <ip addr> remote-as <as# of neighbor> (connect state)
+--> Once configured your router will send BGP TCP request
 
-- OSPF, EIGRP uses multicast addressing while BGP uses unicast
+- OSPF, EIGRP uses multicast addressing while BGP uses UNICAST - it can directly send message to its neighbor
 
 
 
@@ -133,9 +147,9 @@ Would you like me to break it down further or discuss scenarios where BGP behave
 
 
 3. ACTIVE
-Router trying to establish a TCP session but fails
-Router will try to re-establish TCP connection in this state.
-Router waiting for neighbors reply.
+- Router trying to establish a TCP session but fails
+- Router will try to re-establish TCP connection in this state.
+- Router waiting for neighbors reply.
 
        TCP req
 R1 -------------> R2
@@ -151,28 +165,38 @@ R1 -------------> R2
 
 
 4. OPENSENT
-TCP connection is ok
-BGP Open ("hello") has been sent, but neighbor open message has not been received yet.
+- TCP connection is ok
+- BGP Open ("hello") has been sent, but neighbor open message has not been received yet.
 
 5. OPENCONFIRM
-Open message are both sent and received
-Just waiting for a BGP keepalive message to check if there are neighbor parameter mismatch
+- Open message are both sent and received
+- Just waiting for a BGP keepalive message to check if there are neighbor parameter mismatch
 
 6. ESTABLISHED
-All neighbor parameters match, the neighbor relationship works & BGP peers can now exchange BGP updates.
+- All neighbor parameters match, the neighbor relationship works & BGP peers can now exchange BGP updates.
 
-Scenario: Singlehomed
+Scenario: 
+Singlehomed: 10.0.0.0 /24
+R1 (10.0.0.1 AS#10)--------- ISP-1 (10.0.0.2 AS#20)
+
 Syntax:
+@R1
+conf t
+ ! router bgp <as#- own as#>
+ ! neighbor <ip addr> remote <as# of neighbor>
+ exit
 
 conf t
-router bgp <as#- own as#>
-neighbor <ip addr> remote <as# of neighbor>
-exit
+  router bgp 10
+  neighbor 10.0.0.2 remote 20
+ exit
 
 
-
-
-
+@ISP-1
+conf t
+  router bgp 20
+  neighbor 10.0.0.1 remote 10
+ exit
 
 
 
