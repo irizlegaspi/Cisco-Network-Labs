@@ -22,6 +22,8 @@ translating the Inside Local Address 192.168.100.1 to an Inside GLobal address t
 is within the usable IP Address range fo the 185.32.40.80/29 
 
 
+1. Device basic congiguration
+=================================
 conf t
 hostname E1
 enable secret pass
@@ -29,14 +31,14 @@ service password-encryption
 no ip domain-lookup
 !
 line vty 0 4
-password cisco
+password pass
 login
 exec-timeout 0 0
 logging synchronous
 exit
 !
 line con 0
-password cisco
+password pass
 login
 exec-timeout 0 0
 logging synchronous
@@ -45,9 +47,79 @@ exit
 banner login & --- E1 --- &
 
 
+2. Configure IP Address:
+=================================
+
+@E1
+----
+conf t
+int g0/0 
+ip add 192.168.100.1 255.255.255.0
+no shut
+exit
+
+! Not yet configured
+int lo0
+ip add 192.168.10.1 255.255.255.0
+no shut
+exit
 
 
+@E2
+----
+conf t
+int g0/0 
+ip add 192.168.100.2 255.255.255.0
+no shut
+exit
 
+int lo0
+ip add 192.168.40.1 255.255.255.0
+no shut
+exit
+
+int lo1
+ip add 192.168.50.1 255.255.255.0
+no shut
+exit
+
+
+@E3
+----
+conf t
+int g0/0 
+ip add 192.168.100.3 255.255.255.0
+no shut
+exit
+
+int lo0
+ip add 50.0.0.1 255.255.255.0
+no shut
+exit
+
+int lo1
+ip add 60.0.0.1 255.255.255.0
+no shut
+exit
+
+int lo2
+ip add 70.0.0.1 255.255.255.0
+no shut
+exit
+
+
+3. Configure EIGRP routing
+=================================
+
+AS#10
+@E2
+conf t
+router eigrp 10
+network 192.168.40.0 0.0.0.255
+network 192.168.500.0 0.0.0.255
+network 192.168.100.0 0.0.0.255
+no auto-summary
+exit
 
 
 
