@@ -20,3 +20,41 @@ Instructions::
     #sh ip nat translation (your router should have entries for its translation table, 
 translating the Inside Local Address 192.168.100.1 to an Inside GLobal address that 
 is within the usable IP Address range fo the 185.32.40.80/29 
+
+
+conf t
+hostname E1
+enable secret pass
+service password-encryption
+no ip domain-lookup
+!
+line vty 0 4
+password cisco
+login
+exec-timeout 0 0
+logging synchronous
+exit
+!
+line con 0
+password cisco
+login
+exec-timeout 0 0
+logging synchronous
+exit
+!
+banner login & --- E1 --- &
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
