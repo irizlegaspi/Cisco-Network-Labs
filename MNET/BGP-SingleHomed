@@ -1,0 +1,22 @@
+Instructions::
+1. Configure general router configurations on all routers. All password must me "pass".
+2. Configure all Router IP Add as per network diagram
+3. Configure EIGRP on E1, E2 and E3. Use AS #10. Advertsie all directly connected networks on E2 and E3. 
+ On E1, only advertise f0/0's network, do not advertise f0/1's network on E1.
+4. Verify EIGRP connectivity from E3
+---> E3 must be able to ping all E2's loopbacks
+---> E3 must not be able to ping this address: 185.32.40.202
+(If you were able to ping, remove the network advertisement for the 185.32.40.200 network on E1's EIGRP config
+5. Configure default routing on E1 pointing to the ISP. Use exit interface on this configuration.
+6. Test the deault route connectivity. E1 should be able to ping any of the ISP's loopback ip addresses.
+7. Configure static routing on ISP1 routing all traffic for the 185.32.40.80/29 network towards E1. Use the neighbor next hop ip address for this configuration.
+8. Configure NAT on E1. It should translate all its internal private network to this Public network range 185.32.40.80 /29.
+9. Verify the NAT translation 
+---> Do an extended  ping from E1 with the ff. parameters:
+     SIP: 192.168.100.1
+     DIP: 50.0.0.1
+    (This should be succesfully ping)
+---> Issue this command: 
+    #sh ip nat translation (your router should have entries for its translation table, 
+translating the Inside Local Address 192.168.100.1 to an Inside GLobal address that 
+is within the usable IP Address range fo the 185.32.40.80/29 
