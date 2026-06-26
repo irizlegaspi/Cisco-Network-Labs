@@ -58,9 +58,8 @@ ip add 192.168.100.1 255.255.255.0
 no shut
 exit
 
-! Not yet configured
-int lo0
-ip add 192.168.10.1 255.255.255.0
+int g0/1
+ip address 185.32.40.202 255.255.255.0
 no shut
 exit
 
@@ -93,6 +92,28 @@ no shut
 exit
 
 int lo0
+ip add 192.168.10.1 255.255.255.0
+no shut
+exit
+
+int lo1
+ip add 192.168.20.1 255.255.255.0
+no shut
+exit
+
+int lo2
+ip add 192.168.30.1 255.255.255.0
+no shut
+exit
+
+@PLDT
+-------
+int g0/0
+ip address 185.32.40.201 255.255.255.0
+no shut
+exit
+
+int lo0
 ip add 50.0.0.1 255.255.255.0
 no shut
 exit
@@ -111,15 +132,152 @@ exit
 3. Configure EIGRP routing
 =================================
 
-AS#10
+EIGRP AS#10
 @E2
 conf t
 router eigrp 10
 network 192.168.40.0 0.0.0.255
-network 192.168.500.0 0.0.0.255
+network 192.168.50.0 0.0.0.255
 network 192.168.100.0 0.0.0.255
 no auto-summary
 exit
+
+
+@E3
+conf t
+router eigrp 10
+network 192.168.10.0 0.0.0.255
+network 192.168.20.0 0.0.0.255
+network 192.168.30.0 0.0.0.255
+network 192.168.100.0 0.0.0.255
+no auto-summary
+exit
+
+
+@E1
+conf t
+router eigrp 10
+network 192.168.100.0 0.0.0.255
+! network 185.32.40.200 0.0.0.255
+no auto-summary
+exit
+
+
+3. Verify EIGRP connectivity
+=================================
+
+
+
+
+Configure Default routing on E1 pointing to PLDT
+=================================================
+@E1
+----
+conf t
+ip route 0.0.0.0 0.0.0.0 g0/1
+exit
+
+
+
+Configure static routing on ISP1 routing all traffic for the 185.32.40.80/29 network towards E1. 
+Use the neighbor next hop ip address for this configuration.
+==================================================================================================
+@PLDT
+-----
+conf t
+ip route 185.32.40.80 255.255.255.248 185.32.40.202
+exit
+
+
+
+Configure NAT on E1. 
+It should translate all its internal private network to this Public network range 185.32.40.80 /29.
+============================================================================================================================
+@E1
+-----
+conf t
+ip nat pool PublicPool 185.32.40.81 185.32.40.87 netmask 255.255.255.248
+access-list 10 permit 192.168.0.0 0.0.255.255
+ip nat inside source list 10 pool PublicPool overload
+
+int g0/0
+ip nat inside
+
+int g0/1
+ip nat outside
+
+
+Remove the default route configured on E1 in preparation for the BGP lab.
+============================================================================================================================
+@E1
+-------
+en
+conf t
+no ip route 0.0.0.0 0.0.0.0 g0/1
+exit
+
+
+
+************** BGP Configuration ******************
+
+
+Configure BGP Relationship
+==============================
+
+@E1
+-----
+conf t
+router bgp 10
+neighbor 185.32.40.201 remote-as 20
+exit
+
+VERIFY: #show ip bgp neighbors
+
+@ISP1
+----------
+conf t
+router  bgp  20
+neighbor  185.32.40.202   remote-as  10
+exit
+
+VERIFY: #show ip bgp summary
+
+
+
+
+Advertising networks into BGP
+===================================
+Syntax:
+conf t
+router bgp <local AS#>
+network <public network addr> mask <subnet mask>
+exit
+
+PUBLIC NETWORK ADDR ASSIGNED BY ISP, CONFIGURED IN NAT ("PublicPool")---> 185.32.40.80 /29
+
+@E1
+----
+conf t
+router bgp 10
+network 185.32.40.80 mask 255.255.255.248
+exit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
