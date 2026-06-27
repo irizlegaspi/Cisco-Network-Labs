@@ -1,3 +1,7 @@
+Designing and managing a small business network infrastructure using enterprise‑grade Cisco configurations and best practices. 
+Builds, tests, and documents multi‑VLAN, multi‑switch environments that simulate real corporate networks.
+
+
 Instructions::
 1. Configure general router configurations on all routers. All password must me "pass".
 2. Configure all Router IP Add as per network diagram
@@ -196,7 +200,7 @@ It should translate all its internal private network to this Public network rang
 @E1
 -----
 conf t
-ip nat pool PublicPool 185.32.40.81 185.32.40.87 netmask 255.255.255.248
+ip nat pool PublicPool 185.32.40.81 185.32.40.86 netmask 255.255.255.248
 access-list 10 permit 192.168.0.0 0.0.255.255
 ip nat inside source list 10 pool PublicPool overload
 
@@ -208,33 +212,40 @@ ip nat outside
 
 
 Remove the default route configured on E1 in preparation for the BGP lab.
-============================================================================================================================
-@E1
--------
+
+E1:
 en
 conf t
-no ip route 0.0.0.0 0.0.0.0 g0/1
+no ip route 0.0.0.0 0.0.0.0 fa0/1
 exit
-
 
 
 ************** BGP Configuration ******************
 
 
-Configure BGP Relationship
-==============================
+1. BGP CONFIGURATION RELATIONSHIP::
 
-@E1
------
+
+SYNTAX:
 conf t
-router bgp 10
-neighbor 185.32.40.201 remote-as 20
+router  bgp  <local as#>
+neighbor  <ip address>   remote-as  <as # neighbor>
 exit
 
-VERIFY: #show ip bgp neighbors
+E1:
 
-@ISP1
-----------
+#debug ip bgp
+
+E1:
+conf t
+router  bgp  10
+neighbor  185.32.40.201  remote-as  20
+exit
+
+VERIFY: #show ip bgp summary
+#sh bgp neighbors
+
+ISP1:
 conf t
 router  bgp  20
 neighbor  185.32.40.202   remote-as  10
@@ -243,24 +254,136 @@ exit
 VERIFY: #show ip bgp summary
 
 
+TURN OFF DEBUG ON E1: #undebug all
 
 
-Advertising networks into BGP
-===================================
-Syntax:
+
+
+2. ADVERTISING NETWORKS INTO BGP
+
+VERIFY FIRST:
+#SHOW IP ROUTE
+
+#show ip bgp 
+
+sh bgp
+
+#show ip bgp 
+
+WHEN ADVERTISING NETWORKS INTO BGP, BGP WILL ONLY ADVERTISE NETWORKS, WHOSE EXACT PREFIX AND SUBNET MASK APPEARS IN THE ROUTING TABLE
+
+SOLUTION: WE NEED TO CONFIGURE A DISCARD ROUTE POINTING NOWHERE - STATIC ROUTE GOING TO ADVERTISED NETWORK ADDR POINTING NOWHERE, THE PURPOSE IS TO PUSH YOUR ROUTER TO PUT THAT ROUTE IN THE ROUTING TABLE
+
+SYNTAX:
 conf t
-router bgp <local AS#>
-network <public network addr> mask <subnet mask>
+ip  route  <net addr>  <subnet mask>  null0
+
+CREATE A DISCARD ROUTE FOR 185.32.40.80/29 ON E1
+
+E1:
+conf t
+ip  route  185.32.40.80  255.255.255.248  null0
 exit
 
-PUBLIC NETWORK ADDR ASSIGNED BY ISP, CONFIGURED IN NAT ("PublicPool")---> 185.32.40.80 /29
+VERIFY: #show ip bgp 
 
-@E1
-----
+VERIFY ON ISP1:
+#SHOW IP ROUTE
+#SHOW IP BGP 
+
+
+RIB FAILURE??
+IF BGP RECEIVES A NETWORK ADVERTISEMENT FOR A NETWORK FROM A BGP NEIGHBOR, BUT THAT NETWORK IS ALREADY INSIDE THE ROUTING TABLE.
+
+TANGGALIN YUNG STATIC ROUTE CONFIGURED..
+
+ISP 1
+------
 conf t
-router bgp 10
-network 185.32.40.80 mask 255.255.255.248
+no ip route 185.32.40.80 255.255.255.248 185.32.40.202
 exit
+
+
+
+VERIFY:
+#show ip route
+
+#show ip bgp
+
+
+
+DO AN EXTENDED PING FROM E1:
+
+SOURCE:  192.168.100.1
+DESTINATION: 50.0.0.1
+
+E1#PING  50.0.0.1  SOURCE  192.168.100.1
+ping 50.0.0.1 source 192.168.100.1
+
+
+ISP1 WILL FIVE E1 A DEFAULT ROUTE- ADVERTISE A DEFAULT ROUTE THRU BGP TO E1 BY ISP
+DEFAULT ROUTE MUST REMIVED THE DEFAULT ROUTE IF USING BGP, 
+ISP IS RESPONSILBEL TO GIVE DEFAULT ROUTE THROUGH BGP 
+----------------------------------------------------------------------------------
+
+ISP1:
+conf t
+router bgp 20 <local as# of isp>
+network  0.0.0.0   mask   0.0.0.0
+exit
+
+VERIFY ON E1: #show ip route
+
+CREATE A DISCARD ROUTE::
+
+ISP1:
+conf t
+ip  route  0.0.0.0  0.0.0.0  null0
+exit
+
+
+VERIFY on ISP1: 
+#show ip route	
+#show ip bgp 
+
+VERIFY ON E1: 
+#show ip route
+#show ip bgp 
+
+TESTING:
+FROM E1, TRY TO PING 50.0.0.1 USING FA0/0'S IP ADDRESS
+
+E1#ping  50.0.0.1  source  192.168.100.1
+
+TEST FROM E3:
+FROM E3, PING 50.0.0.1
+
+E3: #ping 50.0.0.1
+
+**this is not a ccna topic**
+ROUTE REDISTRIBUTION
+------------------------
+E1:
+conf t
+router eigrp 10
+! redistribute  bgp  <local as#>  metric <bandwidth> <delay> <reliability> <loading> <MTU>
+redistribute  bgp  10  metric 1544 1000 255 1 1500
+exit
+
+
+FROM E2, PING 50.0.0.1
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
