@@ -162,7 +162,6 @@ exit
 conf t
 router eigrp 10
 network 192.168.100.0 0.0.0.255
-! network 185.32.40.200 0.0.0.255
 no auto-summary
 exit
 
@@ -178,6 +177,7 @@ Configure Default routing on E1 pointing to PLDT
 @E1
 ----
 conf t
+! to be removed later
 ip route 0.0.0.0 0.0.0.0 g0/1
 exit
 
@@ -220,20 +220,18 @@ no ip route 0.0.0.0 0.0.0.0 fa0/1
 exit
 
 
+
+
 ************** BGP Configuration ******************
 
-
 1. BGP CONFIGURATION RELATIONSHIP::
-
-
 SYNTAX:
 conf t
 router  bgp  <local as#>
-neighbor  <ip address>   remote-as  <as # neighbor>
+neighbor  <ip address of the directly connected router>   remote-as  <as # neighbor>
 exit
 
 E1:
-
 #debug ip bgp
 
 E1:
@@ -245,14 +243,13 @@ exit
 VERIFY: #show ip bgp summary
 #sh bgp neighbors
 
-ISP1:
+PLDT:
 conf t
 router  bgp  20
 neighbor  185.32.40.202   remote-as  10
 exit
 
 VERIFY: #show ip bgp summary
-
 
 TURN OFF DEBUG ON E1: #undebug all
 
@@ -262,21 +259,20 @@ TURN OFF DEBUG ON E1: #undebug all
 2. ADVERTISING NETWORKS INTO BGP
 
 VERIFY FIRST:
-#SHOW IP ROUTE
-
+#sh ip route
 #show ip bgp 
-
-sh bgp
-
+#sh bgp
 #show ip bgp 
 
 WHEN ADVERTISING NETWORKS INTO BGP, BGP WILL ONLY ADVERTISE NETWORKS, WHOSE EXACT PREFIX AND SUBNET MASK APPEARS IN THE ROUTING TABLE
 
-SOLUTION: WE NEED TO CONFIGURE A DISCARD ROUTE POINTING NOWHERE - STATIC ROUTE GOING TO ADVERTISED NETWORK ADDR POINTING NOWHERE, THE PURPOSE IS TO PUSH YOUR ROUTER TO PUT THAT ROUTE IN THE ROUTING TABLE
+SOLUTION: WE NEED TO CONFIGURE A DISCARD ROUTE POINTING NOWHERE - STATIC ROUTE GOING TO ADVERTISED NETWORK ADDR POINTING NOWHERE, 
+THE PURPOSE IS TO PUSH YOUR ROUTER TO PUT THAT ROUTE IN THE ROUTING TABLE
 
-SYNTAX:
+DISCARD ROUTE SYNTAX:
 conf t
 ip  route  <net addr>  <subnet mask>  null0
+exit
 
 CREATE A DISCARD ROUTE FOR 185.32.40.80/29 ON E1
 
@@ -285,11 +281,16 @@ conf t
 ip  route  185.32.40.80  255.255.255.248  null0
 exit
 
-VERIFY: #show ip bgp 
+VERIFY ON E1: 
+#show ip route
+#show ip bgp 
+
 
 VERIFY ON ISP1:
 #SHOW IP ROUTE
 #SHOW IP BGP 
+
+
 
 
 RIB FAILURE??
@@ -321,23 +322,18 @@ E1#PING  50.0.0.1  SOURCE  192.168.100.1
 ping 50.0.0.1 source 192.168.100.1
 
 
-ISP1 WILL FIVE E1 A DEFAULT ROUTE- ADVERTISE A DEFAULT ROUTE THRU BGP TO E1 BY ISP
-DEFAULT ROUTE MUST REMIVED THE DEFAULT ROUTE IF USING BGP, 
-ISP IS RESPONSILBEL TO GIVE DEFAULT ROUTE THROUGH BGP 
+PLDT WILL FIVE E1 A DEFAULT ROUTE- ADVERTISE A DEFAULT ROUTE THRU BGP TO E1 BY PLDT
+DEFAULT ROUTE MUST REMOVED THE DEFAULT ROUTE IF USING BGP, 
+PLDT IS RESPONSILBLE TO GIVE DEFAULT ROUTE THROUGH BGP 
 ----------------------------------------------------------------------------------
 
-ISP1:
+PLDT:
 conf t
 router bgp 20 <local as# of isp>
 network  0.0.0.0   mask   0.0.0.0
-exit
-
-VERIFY ON E1: #show ip route
-
-CREATE A DISCARD ROUTE::
-
-ISP1:
-conf t
+!
+! CREATE A DISCARD ROUTE::
+!
 ip  route  0.0.0.0  0.0.0.0  null0
 exit
 
@@ -346,9 +342,6 @@ VERIFY on ISP1:
 #show ip route	
 #show ip bgp 
 
-VERIFY ON E1: 
-#show ip route
-#show ip bgp 
 
 TESTING:
 FROM E1, TRY TO PING 50.0.0.1 USING FA0/0'S IP ADDRESS
