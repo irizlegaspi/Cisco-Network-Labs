@@ -1,1 +1,141 @@
 D:\Network Lab\Entreprise Lab Skills\BGP
+
+1. CONFIGURE GENERAL ROUTER CONFIGURATIONS ON ALL ROUTERS. ALL PASSWORDS MUST BE 'pass'
+
+2. CONFIGURE IP ADDRESSES ON ALL ROUTERS AS PER NETWORK DIAGRAM.
+ @E1
+-----
+conf t
+int g0/0
+ip add 11.10.10.1 255.255.255.252
+no shut
+exit
+
+int g0/1
+ip add 12.10.10.1 255.255.255.252
+no shut
+exit
+
+int g0/2
+ip add 172.16.40.1 255.255.255.0
+no shut
+exit
+
+ @ISP1
+--------
+conf t
+int g0/0
+ip add 11.10.10.2 255.255.255.252
+no shut
+exit
+
+int g0/1
+ip add 13.10.10.1 255.255.255.252
+no shut
+exit
+
+ @ISP2
+--------
+conf t
+int g0/1
+ip add 12.10.10.2 255.255.255.252
+no shut
+exit
+!
+int g0/0
+ip add 24.10.10.1 255.255.255.252
+no shut
+exit
+!
+int g0/2
+ip add 23.10.10.1 255.255.255.252
+no shut
+exit
+
+ @ISP3
+--------
+conf t
+int g0/2
+ip add 23.10.10.2 255.255.255.252
+no shut
+exit
+!
+int lo0
+ip add  88.40.100.200 255.255.255.255
+no shut
+exit
+!
+int lo1
+ip add  88.40.100.201 255.255.255.255
+no shut
+exit
+
+ @ISP4
+--------
+conf t
+int g0/0
+ip add 24.10.10.2 255.255.255.252
+no shut
+exit
+!
+int g0/1
+ip add 13.10.10.2 255.255.255.252
+no shut
+exit
+!
+!
+int lo0
+ip add 100.32.80.40 255.255.255.255
+no shut
+exit
+!
+int lo1
+ip add 100.32.80.41 255.255.255.255
+no shut
+exit
+!
+int lo2
+ip add 100.32.80.42 255.255.255.255
+no shut
+exit
+!
+int lo3
+ip add 100.32.80.43 255.255.255.255
+no shut
+exit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
